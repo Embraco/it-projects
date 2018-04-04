@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.2.1/material.teal-orange.min.css">
+    <?!= include('css.html'); ?>
+</head>
+
+<body class="mdl-demo mdl-color-text--grey-700 mdl-base">
+   <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+        <header class="mdl-layout__header" style="background-color: inherit;box-shadow: inherit;">
+            <div class="mdl-layout__tab-panel is-active" id="overview">
+                <section id="section-change" class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
+                    <div class="mdl-card">
+                        <div class="mdl-card__supporting-text">
+                            <div class="mdl-grid">
+                                <div class="mdl-cell mdl-cell--12-col">
+                                    <div class="mdl-textfield mdl-js-textfield">
+                                        <input class="mdl-textfield__input" type="text" id="change-email" disabled="true">
+                                        <label class="mdl-textfield__label mdl-label-float" for="change-email">Email<span>*</span></label>
+                                    </div>
+                                    <div id="resultsEmail" ></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mdl-card__actions">
+                             <button id="save-bt" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" style="min-width: 40px;" onclick="onSave()" disabled="true">Save & Send</button>
+                        </div>
+                    </div>
+                </section>
+             </div>
+        </header>
+    </div>
+</body>
+<script src="https://code.getmdl.io/1.2.0/material.min.js" ></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js" ></script>
+<?!= include('autocomplete.html'); ?>
+<script type="text/javascript">
+var usersCache = [];
+var toChange = '<?!= fieldToChange ?>';
+var requestPlanId = '<?!= requestPlanId ?>';
+var requestLocation = '<?!= requestLocation ?>';
+var newManagerEmail = '';
+
+var run = google.script.run.withFailureHandler(onFailure);
+
+function onFailure(e) {
+    document.getElementById('change-email').disabled = false;
+    alert(e);
+}
+
+function onSave(){
+   document.getElementById('save-bt').disabled = true;
+   var planID = this.requestPlanId;
+   run.withSuccessHandler(function(obj) {
+        if (obj.error) {
+            alert(obj.error);
+        } else {
+            google.script.host.close();
+        }
+        document.getElementById('save-bt').disabled = false;
+   }).saveChange(planID, newManagerEmail, this.requestLocation, toChange);
+}
+
+function usersCacheAndAutompleteSetup() {
+    run.withSuccessHandler(function(list) {
+        this.usersCache = list;
+        document.getElementById('change-email').disabled = false;
+        document.getElementById('save-bt').disabled = false;
+        $('#change-email').immybox({
+            choices: this.usersCache,
+            cleanAtStart: false,
+            dialog: false,
+            showArrow: true,
+            resultPanel: 'resultsEmail',
+            maxResults: 8,
+            formatChoice(query) {
+                const reg = new RegExp("(" + query + ")", 'i');
+                return choice => (
+                    "<div class='mdl-grid mdl-grid--no-spacing'>" +
+                    "<div class='mdl-cell mdl-cell--12-col'>" + [choice.text.replace(reg, "<u>$1</u>"),
+                        choice.value.replace(reg, "<u>$1</u>")
+                    ].join(", ") +
+                    "</div>" +
+                    "</div>");
+            },
+            onSelect(selectedChoice) {
+                newManagerEmail = selectedChoice.value;
+                $('#change-email').val(selectedChoice.text + ' - ' + selectedChoice.value);
+            },
+            openOnClick: true
+        });
+        $('#change-email').focus();
+        $('#change-email').keypress(function(e) { if(e.which == 13) { onSave(); }});
+   }).usersCache();
+}
+usersCacheAndAutompleteSetup();
+</script>
+</html>

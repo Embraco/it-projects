@@ -14,7 +14,7 @@ This application is running and maintained on a google drive repository.
 --------------------------------------
 
 
---------Git Repository Folders--------
+--------GitHub Repository Folders--------
 
 - IT-Projects-App: Use this folder to store all script files which were/will be created on https://script.google.com/a/embraco.com/d/1tkrtd_e_zX66ynNpKk08uWmRnG_DwxZ8VDvJ0H3idQgcKHpTISVEXM2c/edit?usp=drive_web
 

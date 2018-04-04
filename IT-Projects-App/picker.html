@@ -1,0 +1,126 @@
+<script type="text/javascript">
+        var pickerApiLoaded = false;
+        var gtoken;
+        var groot;
+        var selectedField;
+
+        function onApiLoad() {
+            gapi.load('picker', {
+                'callback': function() {
+                    pickerApiLoaded = true;
+                }
+            });
+            google.script.run.withSuccessHandler(createPicker).withFailureHandler(showError).getOAuthToken();
+        }
+
+        function createPicker(obj) {
+            if (pickerApiLoaded && obj) {
+                gtoken = obj.token;
+                groot = obj.root;
+            } else {
+                showError('Unable to load the file picker.');
+            }
+        }
+
+        function showPickerMultipleFilesAndUpload() {
+            var uploadView = new google.picker.DocsUploadView().setParent('0B973TWs84ZCESlF5d0lGRUF6Xzg');
+                var docsView = new google.picker.DocsView().setParent(groot).setIncludeFolders(true)
+                .setSelectFolderEnabled(true).setOwnedByMe(true).setMode(google.picker.DocsViewMode.LIST);
+
+            var picker = new google.picker.PickerBuilder()
+            .addView(docsView)
+            .addView(uploadView)
+            .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
+            .hideTitleBar()
+            .setOAuthToken(gtoken)
+            .setCallback(pickerCallbackMultipleFiles)
+            .setOrigin('https://script.google.com')
+            .build();
+            picker.setVisible(true);
+        }
+
+        function showPickerSingleFile(fieldId) {
+            var uploadView = new google.picker.DocsUploadView().setParent('0B973TWs84ZCESlF5d0lGRUF6Xzg');
+            var docsView = new google.picker.DocsView().setParent(groot).setIncludeFolders(true)
+                .setOwnedByMe(true).setMode(google.picker.DocsViewMode.LIST);
+            var picker = new google.picker.PickerBuilder()
+            .addView(docsView)
+            .addView(uploadView)
+            .hideTitleBar()
+            .setOAuthToken(gtoken)
+            .setCallback(pickerCallbackSingleFile)
+            .setOrigin('https://script.google.com')
+            .build();
+            picker.setVisible(true);
+            selectedField = fieldId;
+        }
+
+        function pickerCallbackMultipleFiles(data) {
+            var action = data.action;
+            if (action == google.picker.Action.PICKED) {
+               for (var i in data.docs){
+                 var doc = data.docs[i];
+                 var file = {id:doc.id, icon:doc.iconUrl, name:doc.name, url:doc.url, date:new Date().toString(), userEmail:currentUser}
+                 np.projectAttachmets.push(file);
+                 addFileToTable(file, true);
+                 componentHandler.upgradeAllRegistered();
+                }
+                if (projectID != 0 && np.projectStatus != projectStatus.DRAFT)
+                   saveFiles();
+            } else if (action == google.picker.Action.CANCEL) {
+
+            }
+        }
+        function addFileToTable(file, activeSaveButton){
+           $('#attachs-tb tbody').append(
+                 '<tr style="height: 34px;">'+
+                 '<td style="height: 34px;padding:2px" class="mdl-data-table__cell--non-numeric">'+
+                 '  <a style="width: inherit;" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect mdl-button-left" target="_blank" href="'+file.url+'">'+
+                 '   <img style="margin-bottom: 3px;" src="'+file.icon+'">&nbsp;'+file.name+'</a> by '+file.userEmail+
+                 '  </td>' +
+                 '  <td>' +
+                 '    <button id="attach-delete-bt" onclick="removeDoc(\''+file.id+'\');removeRow(this)" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon delete-bt">' +
+                 '      <i class="material-icons">delete</i>' +
+                 '    </button>' +
+                 '  </td>' +
+                 '</td></tr>');
+        }
+
+        function pickerCallbackSingleFile(data) {
+            var action = data.action;
+            if (action == google.picker.Action.PICKED) {
+                var doc = data[google.picker.Response.DOCUMENTS][0];
+                var title = doc[google.picker.Document.NAME];
+                var id = doc[google.picker.Document.ID];
+                var url = doc[google.picker.Document.URL];
+                var iconUrl = doc[google.picker.Document.ICON_URL];
+                var obj = {id:id, icon:iconUrl, name:title, url:url, date:new Date().toString(), userEmail:currentU};
+                $('#'+selectedField).append('<a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect mdl-button-left" target="_blank" href="'+url+'"><img style="margin-bottom: 3px;" src="'+iconUrl+'">&nbsp;'+title+'</a>');
+                switch(selectedField){
+                 case 'brm-arch-file':
+                    archAnalysisAttach = obj;
+                    break;
+                 case 'brm-lct-attach':
+                    lctAttach = obj;
+                    break;
+                 case 'brm-idt-attach':
+                    idtAttach = obj;
+                    break;
+                 case 'brm-clt-attach':
+                    cltAttach = obj;
+                    break;
+                 case 'brm-wdt-attach':
+                    wdtAttach = obj;
+                    break;
+                }
+
+            //    document.getElementById(selectedField).value = title;
+            } else if (action == google.picker.Action.CANCEL) {
+
+            }
+        }
+
+        function showError(message) {
+            alert('Error: ' + message);
+        }
+    </script>

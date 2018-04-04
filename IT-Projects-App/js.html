@@ -1,0 +1,1640 @@
+<script src="https://code.getmdl.io/1.2.0/material.min.js"></script>
+<script type="text/javascript">
+    var np;
+var CS = 1;
+var usersCache = [];
+var projectStatus = {
+    DRAFT: 1,
+    BUSINESS_APPROVAL: 2,
+    IT_APPROVAL: 3,
+    BRM_MANAGERS: 10,
+    PROJECT_ANALYSIS: 4,
+    PROJECT_PRIORITIZATION_FOR_EXECUTION: 5,
+    PROJECT_EXECUTION: 6,
+    PROJECT_IN_EVALUATION: 7,
+    FINISHED: 8
+};
+var locationPlants = [{
+        text: 'BRAZIL',
+        value: 'BRAZIL'
+    },
+    {
+        text: 'USA',
+        value: 'USA'
+    },
+    {
+        text: 'MEXICO',
+        value: 'MEXICO'
+    },
+    {
+        text: 'ITALY',
+        value: 'ITALY'
+    },
+    {
+        text: 'SLOVAKIA',
+        value: 'SLOVAKIA'
+    },
+    {
+        text: 'BEIJING CHINA',
+        value: 'BEIJING CHINA'
+    },
+    {
+        text: 'QD CHINA',
+        value: 'QD CHINA'
+    }
+];
+var localCancel = false;
+//===========================================================================
+var run = google.script.run.withFailureHandler(onFailure);
+
+function onFailure(e) {
+    debugger;
+    var dialog = document.querySelector('#error-dialog');
+    $('#dialog-text').empty();
+    $('#dialog-text').append(e);
+    $('#progressbar').hide();
+    $('#prj-save-bt').prop('disabled', false);
+    $('#prj-send-bt').prop('disabled', false);
+    dialog.showModal();
+}
+//================================================
+function newProject() {
+    $('#progressbar').show();
+    run.withSuccessHandler(function(obj) {
+        np = obj;
+        projectID = np.projectPlanID;
+        setValue('nreq-requester', np.requesterName + ' - ' + np.requesterEmail);
+        setValue('nreq-requesterPhone', obj.requesterPhone);
+        setValue('nreq-requesterManager', obj.requesterManager);
+        setValue('nreq-requesterDepartment', obj.requesterDepartment);
+        setValue('nreq-requesterLocation', obj.requesterLocation);
+        setValue('nreq-prjName', np.projectName);
+        setValue('nreq-description', np.projectDesc);
+        setValue('nreq-benefits', np.projectBenefits);
+        updateAttachmentTable(np.projectAttachmets);
+        updateCommentTable(np.comments);
+        $('#progressbar').hide();
+    }).newProject();
+}
+
+function retrieveUserInfo() {
+    $('#progressbar').show();
+    var split = $('#nreq-requester').val().split(' - ');
+    var email = split[1];
+    run.withSuccessHandler(function(obj) {
+        np = obj;
+        setValue('nreq-requester', np.requesterName + ' - ' + np.requesterEmail);
+        setValue('nreq-requesterPhone', obj.requesterPhone);
+        setValue('nreq-requesterManager', obj.requesterManager);
+        setValue('nreq-requesterDepartment', obj.requesterDepartment);
+        setValue('nreq-requesterLocation', obj.requesterLocation);
+        $('#progressbar').hide();
+    }).retrieveUserInfo(email, np);
+}
+
+function retrieveProject() {
+    $('#progressbar').show();
+    run.withSuccessHandler(function(obj) {
+        np = obj.np;
+        if (obj.error) {
+            var dialog = document.querySelector('#error-dialog');
+            $('#dialog-text').empty();
+            $('#dialog-text').append(obj.error);
+            $('#progressbar').hide();
+            dialog.showModal();
+        } else {
+            setIDtoScreen();
+            hideSections();
+            setValue('nreq-requester', np.requesterName + ' - ' + np.requesterEmail);
+            setValue('nreq-requesterManager', np.requesterManager);
+            setValue('nreq-requesterPhone', np.requesterPhone);
+            setValue('nreq-requesterDepartment', np.requesterDepartment);
+            setValue('nreq-requesterLocation', np.requesterLocation);
+            setValue('nreq-prjName', np.projectName);
+            setValue('nreq-description', np.projectDesc);
+            setValue('nreq-benefits', np.projectBenefits);
+            setValue('ba-comments', np.projectApprovalComment);
+            setValue('ia-brm', np.projectBrm);
+            setValue('ia-comments', np.projectITApprovalComment);
+            setValue('brmm-comments', np.projectBrmManagerApprovalComment);
+            setValue('brmm-brma', np.projectBrmManagerBrmAnalyst);
+            if (np.projectBrmPortfolioManager != '')
+                setValue('brm-port-manager', np.projectBrmPortfolioManager);
+            setValue('brm-comments', np.projectBrmApprovalComment);
+            setValue('pa-pm', np.projectPm);
+            setValue('pa-comments', np.projectITPortfolioComment);
+            setValue('pe-comments', np.projectPmComment);
+            if (np.projectSponsorName != '')
+                setValue('pe-sponsor', np.projectSponsorName + ' - ' + np.projectSponsorEmail);
+            //-------------------------------------------------
+            setValue('cancel-cancelation-comments', np.projectCanceledAuthorComment);
+            setValue('cancel-user-cancelation-comments', np.projectCanceledRequesterAnswerComment);
+            //-------------------------------------------------
+            if (np.question1 != '') {
+                $("[name=question-1]").val(np.question1);
+                document.getElementById('question-1-' + np.question1).parentNode.MaterialRadio.check();
+                $("[name=question-2]").val(np.question2);
+                document.getElementById('question-2-' + np.question2).parentNode.MaterialRadio.check();
+                $("[name=question-3]").val(np.question3);
+                document.getElementById('question-3-' + np.question3).parentNode.MaterialRadio.check();
+                $("[name=question-4]").val(np.question4);
+                document.getElementById('question-4-' + np.question4).parentNode.MaterialRadio.check();
+                setValue('question-5', np.question5);
+            }
+            //-------------------------------------------------
+            $('#sp-ba-manager').text(np.requesterManager);
+            $('#sp-ia-manager').text(np.projectLocalITManager);
+            $('#sp-brmm').text(np.projectBrm);
+            $('#sp-brm').text(np.projectBrmManagerBrmAnalyst);
+            $('#sp-ppe-itportfoliomanager').text(np.projectBrmPortfolioManager);
+            $('#sp-pe-pm').text(np.projectPm);
+            $('#sp-evaluation').text(np.projectSponsorEmail);
+            //-------------------------------------------------
+            updateAttachmentTable(np.projectAttachmets);
+            updateCommentTable(np.comments);
+
+            var topstatus = Number(np.projectStatus);
+            if(np.projectStatus == projectStatus.BRM_MANAGERS) topstatus = 3;
+            for (var i = 1; i < topstatus; i++) {
+                var step = $('#step' + i);
+                step.empty();
+                step.append('check_circle');
+            }
+            console.log(np);
+            switch (np.projectStatus) {
+                case projectStatus.DRAFT:
+                    usersCacheAndAutompleteSetup(true);
+                    break;
+                case projectStatus.BUSINESS_APPROVAL:
+                    cleanAndIncludeNewIcon('status-ba', '');
+                    //------------------------------------------------
+                    if (np.projectApproval === false) {
+                        cleanAndIncludeNewIcon('status-ba', 'cancel');
+                        showCardBody('np');
+                        blockNewRequestFields(false);
+                        blockManagerFields(true);
+                        var step = $('#step2');
+                        step.empty();
+                        step.append('cancel');
+                        var step = $('#step1');
+                        step.empty();
+                        step.append('looks_one');
+                        document.querySelector('#p1').MaterialProgress.setProgress(0);
+                    } else {
+                        cleanAndIncludeNewIcon('status-np', 'check_circle');
+                        blockNewRequestFields(true);
+                        blockManagerFields(false);
+                        hideCardBody('np');
+                        showCardBody('ba');
+                        document.querySelector('#p1').MaterialProgress.setProgress(7);
+                    }
+                    //------------------------------------------------
+                    if (currentUser != np.requesterEmail.toLowerCase())
+                        blockNewRequestFields(true);
+                    if (currentUser != np.requesterManager.toLowerCase())
+                        blockManagerFields(true);
+                    //------------------------------------------------
+                    document.getElementById('section-ba').style.display = 'flex';
+                    break;
+                case projectStatus.IT_APPROVAL:
+                    hideCardBody('ba');
+                    showCardBody('ia');
+                    //usersCacheAndComboSetup('ia-brm', 'resultsBRM');
+                    //------------------------------------------------
+                    if (np.projectITApproval === false) {
+                        cleanAndIncludeNewIcon('status-ia', 'cancel');
+                        showCardBody('np');
+                        blockNewRequestFields(false);
+                        blockManagerFields(true);
+                        blockITManagerFields(true);
+                        //var step = $('#step3'); step.empty(); step.append('cancel');
+                        document.querySelector('#p1').MaterialProgress.setProgress(7);
+                        var step = $('#step1'); step.empty(); step.append('looks_one');
+                        var step = $('#step2'); step.empty(); step.append('cancel');
+                        usersCacheAndAutompleteSetup(true);
+                    } else {
+                        cleanAndIncludeNewIcon('status-np', 'check_circle');
+                        cleanAndIncludeNewIcon('status-ba', 'check_circle');
+                        cleanAndIncludeNewIcon('status-ia', '');
+                        blockNewRequestFields(true);
+                        blockManagerFields(true);
+                        blockITManagerFields(false);
+                        hideCardBody('np');
+                        document.querySelector('#p1').MaterialProgress.setProgress(21);
+                    }
+                    //------------------------------------------------
+                    if (currentUser != np.requesterEmail.toLowerCase())
+                        blockNewRequestFields(true);
+                    if (currentUser != np.projectLocalITManager.toLowerCase())
+                        blockITManagerFields(true);
+                    //------------------------------------------------
+                    document.getElementById('section-ba').style.display = 'flex';
+                    document.getElementById('section-ia').style.display = 'flex';
+                    break;
+
+                case projectStatus.BRM_MANAGERS:
+                    cleanAndIncludeNewIcon('status-np', 'check_circle');
+                    cleanAndIncludeNewIcon('status-ba', 'check_circle');
+                    cleanAndIncludeNewIcon('status-ia', 'check_circle');
+                    blockNewRequestFields(true);
+                    blockManagerFields(true);
+                    hideCardBody('np');
+                    hideCardBody('ba');
+                    hideCardBody('ia');
+                    showCardBody('brmm');
+                    usersCacheAndComboSetup('brmm-brma', 'resultsBRMA');
+                    //------------------------------------------------
+                    if (np.projectBrmManagerApproval === false) {
+                        cleanAndIncludeNewIcon('status-brmm', 'cancel');
+                        showCardBody('np');
+                        blockNewRequestFields(false);
+                        blockManagerFields(true);
+                        blockITManagerFields(true);
+                        blockBrmmFields(true);
+                        document.querySelector('#p1').MaterialProgress.setProgress(7);
+                        var step = $('#step1'); step.empty(); step.append('looks_one');
+                        var step = $('#step2'); step.empty(); step.append('cancel');
+                        usersCacheAndAutompleteSetup(true);
+                    } else {
+                        hideCardBody('ia');
+                        blockITManagerFields(true);
+                        blockBrmmFields(false);
+                        document.querySelector('#p1').MaterialProgress.setProgress(36);
+                    }
+                    //------------------------------------------------
+                    if (currentUser != np.projectBrm)
+                        blockBrmmFields(true);
+                    if (currentUser != np.projectLocalITManager)
+                        blockITManagerFields(true);
+                    document.getElementById('section-ba').style.display = 'flex';
+                    document.getElementById('section-ia').style.display = 'flex';
+                    document.getElementById('section-brmm').style.display = 'flex';
+                    break;
+                case projectStatus.PROJECT_ANALYSIS:
+                    cleanAndIncludeNewIcon('status-np', 'check_circle');
+                    cleanAndIncludeNewIcon('status-ba', 'check_circle');
+                    cleanAndIncludeNewIcon('status-ia', 'check_circle');
+                    cleanAndIncludeNewIcon('status-brmm', 'check_circle');
+                    blockNewRequestFields(true);
+                    blockManagerFields(true);
+                    blockITManagerFields(true);
+                    blockBrmmFields(true);
+                    hideCardBody('np');
+                    hideCardBody('ba');
+                    hideCardBody('ia');
+                    hideCardBody('brmm');
+                    showCardBody('pa');
+                    //------------------------------------------------
+                    if (np.projectBrmApproval === false) {
+                        cleanAndIncludeNewIcon('status-pa', 'cancel');
+                        usersCacheAndComboSetup('brmm-brma', 'resultsBRMA');
+                        showCardBody('brmm');
+                        blockBrmmFields(false);
+                        blockBrmFields(true);
+                        var step = $('#step3');
+                        step.empty();
+                        step.append('cancel');
+                        document.querySelector('#p1').MaterialProgress.setProgress(36);
+                    } else {
+                        hideCardBody('brmm');
+                        blockBrmmFields(true);
+                        blockBrmFields(false);
+                        document.querySelector('#p1').MaterialProgress.setProgress(50);
+                    }
+                    //------------------------------------------------
+                    if (currentUser != np.projectBrmManagerBrmAnalyst.toLowerCase())
+                        blockBrmFields(true);
+                    if (currentUser != np.projectLocalITManager.toLowerCase())
+                        blockITManagerFields(true);
+                    document.getElementById('section-ba').style.display = 'flex';
+                    document.getElementById('section-ia').style.display = 'flex';
+                    document.getElementById('section-brmm').style.display = 'flex';
+                    document.getElementById('section-pa').style.display = 'flex';
+                    break;
+                case projectStatus.PROJECT_PRIORITIZATION_FOR_EXECUTION:
+                    cleanAndIncludeNewIcon('status-np', 'check_circle');
+                    cleanAndIncludeNewIcon('status-ba', 'check_circle');
+                    cleanAndIncludeNewIcon('status-ia', 'check_circle');
+                    cleanAndIncludeNewIcon('status-brmm', 'check_circle');
+                    cleanAndIncludeNewIcon('status-pa', 'check_circle');
+                    blockNewRequestFields(true);
+                    blockManagerFields(true);
+                    blockITManagerFields(true);
+                    blockBrmmFields(true);
+                    hideCardBody('np');
+                    hideCardBody('ba');
+                    hideCardBody('ia');
+                    hideCardBody('brmm');
+                    showCardBody('ppe');
+                    usersCacheAndComboSetup('pa-pm', 'resultsPM');
+                    //------------------------------------------------
+                    if (np.projectITPortfolioApproval === false) {
+                        cleanAndIncludeNewIcon('status-ppe', 'cancel');
+                        showCardBody('pa');
+                        blockBrmFields(false);
+                        blockPortfolioManagerFields(true);
+                        var step = $('#step4');
+                        step.empty();
+                        step.append('cancel');
+                        document.querySelector('#p1').MaterialProgress.setProgress(50);
+                    } else {
+                        blockBrmFields(true);
+                        blockPortfolioManagerFields(false);
+                        hideCardBody('pa');
+                        $('#pa-cancel-action-bt').prop('disabled', false);
+                        document.querySelector('#p1').MaterialProgress.setProgress(64);
+                    }
+                    if (currentUser != np.projectBrmPortfolioManager.toLowerCase())
+                        blockPortfolioManagerFields(true);
+                    if (currentUser != np.projectBrm.toLowerCase())
+                        blockBrmFields(true);
+                    document.getElementById('section-ba').style.display = 'flex';
+                    document.getElementById('section-ia').style.display = 'flex';
+                    document.getElementById('section-brmm').style.display = 'flex';
+                    document.getElementById('section-pa').style.display = 'flex';
+                    document.getElementById('section-ppe').style.display = 'flex';
+                    break;
+                case projectStatus.PROJECT_EXECUTION:
+                    usersCacheAndAutompleteSetup(false);
+                    cleanAndIncludeNewIcon('status-np', 'check_circle');
+                    cleanAndIncludeNewIcon('status-ba', 'check_circle');
+                    cleanAndIncludeNewIcon('status-ia', 'check_circle');
+                    cleanAndIncludeNewIcon('status-brmm', 'check_circle');
+                    cleanAndIncludeNewIcon('status-pa', 'check_circle');
+                    cleanAndIncludeNewIcon('status-ppe', 'check_circle');
+                    blockNewRequestFields(true);
+                    blockManagerFields(true);
+                    blockITManagerFields(true);
+                    blockBrmmFields(true);
+                    blockBrmFields(true);
+                    blockPortfolioManagerFields(true);
+                    hideCardBody('np');
+                    hideCardBody('ba');
+                    hideCardBody('ia');
+                    hideCardBody('brmm');
+                    hideCardBody('pa');
+                    hideCardBody('ppe');
+                    showCardBody('pe');
+                    if (currentUser != np.projectPm.toLowerCase())
+                        blockProjectManagerFields(true);
+                    if (np.projectSponsorEmail == '') {
+                        $('#pe-sponsor').val(np.requesterName + ' - ' + np.requesterEmail);
+                    }
+                    document.querySelector('#p1').MaterialProgress.setProgress(79);
+                    document.getElementById('section-ba').style.display = 'flex';
+                    document.getElementById('section-ia').style.display = 'flex';
+                    document.getElementById('section-brmm').style.display = 'flex';
+                    document.getElementById('section-pa').style.display = 'flex';
+                    document.getElementById('section-ppe').style.display = 'flex';
+                    document.getElementById('section-pe').style.display = 'flex';
+                    break;
+                case projectStatus.PROJECT_IN_EVALUATION:
+                    blockNewRequestFields(true);
+                    blockManagerFields(true);
+                    blockITManagerFields(true);
+                    blockBrmmFields(true);
+                    blockBrmFields(true);
+                    blockPortfolioManagerFields(true);
+                    blockProjectManagerFields(true);
+                    blockAttachments();
+                    hideCardBody('np');
+                    hideCardBody('ba');
+                    hideCardBody('ia');
+                    hideCardBody('brmm');
+                    hideCardBody('pa');
+                    hideCardBody('ppe');
+                    hideCardBody('pe');
+                    if (currentUser != np.requesterEmail.toLowerCase()) {
+                        blockEvaluation();
+                    }
+                    $('#section-evaluation').show();
+                    cleanAndIncludeNewIcon('status-np', 'check_circle');
+                    cleanAndIncludeNewIcon('status-ba', 'check_circle');
+                    cleanAndIncludeNewIcon('status-ia', 'check_circle');
+                    cleanAndIncludeNewIcon('status-brmm', 'check_circle');
+                    cleanAndIncludeNewIcon('status-pa', 'check_circle');
+                    cleanAndIncludeNewIcon('status-ppe', 'check_circle');
+                    cleanAndIncludeNewIcon('status-pe', 'check_circle');
+                    document.getElementById('section-ba').style.display = 'flex';
+                    document.getElementById('section-ia').style.display = 'flex';
+                    document.getElementById('section-brmm').style.display = 'flex';
+                    document.getElementById('section-pa').style.display = 'flex';
+                    document.getElementById('section-ppe').style.display = 'flex';
+                    document.getElementById('section-pe').style.display = 'flex';
+                    document.getElementById('section-evaluation').style.display = 'flex';
+                    document.querySelector('#p1').MaterialProgress.setProgress(93);
+                    break;
+                case projectStatus.FINISHED:
+                    blockNewRequestFields(true);
+                    blockManagerFields(true);
+                    blockITManagerFields(true);
+                    blockBrmmFields(true);
+                    blockBrmFields(true);
+                    blockPortfolioManagerFields(true);
+                    blockProjectManagerFields(true);
+                    blockAttachments();
+                    blockEvaluation();
+                    hideCardBody('np');
+                    hideCardBody('ba');
+                    hideCardBody('ia');
+                    hideCardBody('brmm');
+                    hideCardBody('pa');
+                    hideCardBody('ppe');
+                    hideCardBody('pe');
+                    hideCardBody('evaluation');
+                    cleanAndIncludeNewIcon('status-np', 'check_circle');
+                    cleanAndIncludeNewIcon('status-ba', 'check_circle');
+                    cleanAndIncludeNewIcon('status-ia', 'check_circle');
+                    cleanAndIncludeNewIcon('status-brmm', 'check_circle');
+                    cleanAndIncludeNewIcon('status-pa', 'check_circle');
+                    cleanAndIncludeNewIcon('status-ppe', 'check_circle');
+                    cleanAndIncludeNewIcon('status-pe', 'check_circle');
+                    document.getElementById('section-ba').style.display = 'flex';
+                    document.getElementById('section-ia').style.display = 'flex';
+                    document.getElementById('section-brmm').style.display = 'flex';
+                    document.getElementById('section-pa').style.display = 'flex';
+                    document.getElementById('section-ppe').style.display = 'flex';
+                    document.getElementById('section-pe').style.display = 'flex';
+                    document.getElementById('section-evaluation').style.display = 'flex';
+                    document.querySelector('#p1').MaterialProgress.setProgress(100);
+                    break;
+            }
+            if (np.projectCanceled == true) {
+                for (var i = 1; i < 7; i++) {
+                    var step = $('#step' + i);
+                    step.empty();
+                    step.append('cancel');
+                }
+                document.querySelector('#p1').MaterialProgress.setProgress(100);
+                blockNewRequestFields(true);
+                blockManagerFields(true);
+                blockITManagerFields(true);
+                blockBrmmFields(true);
+                blockBrmFields(true);
+                blockPortfolioManagerFields(true);
+                blockProjectManagerFields(true);
+                blockAttachments();
+                hideCardBody('np');
+                hideCardBody('ba');
+                hideCardBody('ia');
+                hideCardBody('pa');
+                hideCardBody('ppe');
+                hideCardBody('pe');
+                $('#section-cancel').show();
+                $('#cancel-cancelation-comments').prop('readonly', true);
+                if (np.projectCanceledAuthor == np.requesterEmail)
+                    $('#cancel-user-answer-tx').hide();
+                else
+                    $('#cancel-user-answer-tx').show();
+                if (np.projectCanceledRequesterAnswer == true) {
+                    $('#cancel-user-control').hide();
+                    $('#cancel-user-cancelation-comments').prop('readonly', true);
+
+                } else {
+                    $('#cancel-user-control').show();
+                }
+
+            } else {
+                $('#cancel-cancelation-comments').prop('readonly', false);
+            }
+
+
+            $('#progressbar').hide();
+            componentHandler.upgradeAllRegistered();
+        }
+    }).retrieveProject(projectID);
+}
+//============================================================================================================
+//***********************************************************************************************************
+//============================================================================================================
+function saveDraft() {
+    var bar = $('#progressbar');
+    bar.show();
+    var form = _getProjectInfoNoValidation();
+    form.saveTime = new Date().toString();
+    run.withSuccessHandler(function(obj) {
+        np = obj.np;
+        if (obj.error) {
+            var dialog = document.querySelector('#error-dialog');
+            $('#dialog-text').empty();
+            $('#dialog-text').append(obj.error);
+            dialog.showModal();
+        } else {
+            projectID = np.projectPlanID;
+            toast('Your request has been successfully saved! Now you can send to Approval step!');
+            updateCommentTable(np.comments);
+            componentHandler.upgradeAllRegistered();
+        }
+        $('#prj-save-bt').prop('disabled', false);
+        $('#prj-send-bt').prop('disabled', false);
+        $('#np-cancel-action-bt').prop('disabled', false);
+        bar.hide();
+    }).saveProjectNewRequest(form);
+}
+
+function sendNewRequestToApproval() {
+    var bar = $('#progressbar');
+    bar.show();
+    var form = _getProjectInfo();
+    if (form == false) {
+        $('#prj-save-bt').prop('disabled', false);
+        $('#prj-send-bt').prop('disabled', false);
+        $('#np-cancel-action-bt').prop('disabled', false);
+        bar.hide();
+        return false;
+    }
+    np.requesterManager = valide('nreq-requesterManager', 'Manager is required!');
+    np.projectStatus = projectStatus.BUSINESS_APPROVAL;
+    np.saveTime = new Date().toString();
+    run.withSuccessHandler(function(obj) {
+        np = obj.np;
+        if (obj.error) {
+            var dialog = document.querySelector('#error-dialog');
+            var dialogText = $('#dialog-text');
+            dialogText.empty();
+            dialogText.append(obj.error);
+            dialog.showModal();
+            $('#prj-send-bt').prop('disabled', false);
+            $('#prj-save-bt').prop('disabled', false);
+            $('#np-cancel-action-bt').prop('disabled', false);
+        } else {
+            projectID = np.projectPlanID;
+            toast('Your request has been successfully sent to the Local Area Manager.');
+            retrieveProject();
+            var now = new Date();
+            var state = {
+                'timestamp': now.getTime()
+            };
+            var params = {
+                'id': np.projectPlanID
+            };
+            google.script.history.replace(state, params, null);
+        }
+        bar.hide();
+    }).sendNewRequestToApproval(np);
+}
+
+function saveProjectApproval(value) {
+    var bar = $('#progressbar');
+    bar.show();
+    np.projectApproval = value;
+    if (value === false) {
+        np.projectApprovalComment = valide('ba-comments', 'Comment is required!');
+        if (np.projectApprovalComment == false) {
+            bar.hide();
+            return false;
+        }
+    }
+    np.projectApprovalComment = $('#ba-comments').val();
+    np.projectApprovalComment = np.projectApprovalComment.trim();
+    np.projectApprovalDate = new Date().toString();
+    np.projectApprovalApprover = currentUser;
+    if (value == true)
+        np.projectStatus = projectStatus.IT_APPROVAL;
+    if (value == false)
+        np.projectStatus = projectStatus.BUSINESS_APPROVAL;
+
+    run.withSuccessHandler(function(obj) {
+        np = obj.np;
+        if (obj.error) {
+            var dialog = document.querySelector('#error-dialog');
+            var dialogText = $('#dialog-text');
+            dialogText.empty();
+            dialogText.append(obj.error);
+            dialog.showModal();
+        } else {
+            var msg = '';
+            var to = '';
+            if (value === true) {
+                msg = 'Your answer has been sent to IT Business Development Manager.';
+            } else {
+                msg = 'Your answer has been sent back to Requester.';
+            }
+            toast(msg);
+            retrieveProject();
+        }
+        bar.hide();
+    }).saveApprovalStep(np);
+}
+
+function saveITManagerApproval(value) {
+    var bar = $('#progressbar');
+    bar.show();
+    np.projectITApproval = value;
+    if (value === true) {
+        np.projectBrm = valide('ia-brm', 'BRM is required!');
+        if (np.projectBrm == false) {
+            bar.hide();
+            return false;
+        }
+    } else {
+        np.projectITApprovalComment = valide('ia-comments', 'Comment is required!');
+        if (np.projectITApprovalComment == false) {
+            bar.hide();
+            return false;
+        }
+    }
+    np.projectITApprovalComment = $('#ia-comments').val();
+    np.projectITApprovalComment = np.projectITApprovalComment.trim();
+    np.projectITApprovalDate = new Date().toString();
+    np.projectITApprover = currentUser;
+    if (value == true)
+        np.projectStatus = projectStatus.BRM_MANAGERS;
+    if (value == false)
+        np.projectStatus = projectStatus.IT_APPROVAL;
+
+    run.withSuccessHandler(function(obj) {
+        np = obj.np;
+        if (obj.error) {
+            var dialog = document.querySelector('#error-dialog');
+            var dialogText = $('#dialog-text');
+            dialogText.empty();
+            dialogText.append(obj.error);
+            dialog.showModal();
+        } else {
+            var msg = '';
+            var to = '';
+            if (value === true) {
+                msg = 'Your answer has been sent to BRM.';
+            } else {
+                msg = 'Your answer has been sent back to Local Area Manager.';
+            }
+            toast(msg);
+            retrieveProject();
+        }
+        bar.hide();
+    }).saveITManagerApproval(np);
+}
+
+function saveBrmManagerApproval(value) {
+    var bar = $('#progressbar');
+    bar.show();
+
+    np.projectBrmManagerApproval = value;
+    if (value === true) {
+        np.projectBrmManagerBrmAnalyst = valide('brmm-brma', 'BRM Analyst is required!');
+        if (np.projectBrmManagerBrmAnalyst == false) {
+            bar.hide();
+            return false;
+        }
+    } else {
+        np.projectBrmManagerApprovalComment = valide('brmm-comments', 'Comment is required!');
+        if (np.projectBrmManagerApprovalComment == false) {
+            bar.hide();
+            return false;
+        }
+    }
+    np.projectBrmManagerApprovalComment = $('#brmm-comments').val();
+    np.projectBrmManagerApprovalComment = np.projectBrmManagerApprovalComment.trim();
+    np.projectBrmManagerApprovalDate = new Date().toString();
+    np.projectBrmManagerApprover = currentUser;
+    if (value == true)
+        np.projectStatus = projectStatus.PROJECT_ANALYSIS;
+    if (value == false)
+        np.projectStatus = projectStatus.BRM_MANAGERS;
+
+    run.withSuccessHandler(function(obj) {
+        np = obj.np;
+        if (obj.error) {
+            var dialog = document.querySelector('#error-dialog');
+            var dialogText = $('#dialog-text');
+            dialogText.empty();
+            dialogText.append(obj.error);
+            dialog.showModal();
+        } else {
+            var msg = '';
+            var to = '';
+            if (value === true) {
+                msg = 'Your answer has been sent to BRM Analyst.';
+            } else {
+                msg = 'Your answer has been sent back to BRM.';
+            }
+            toast(msg);
+            retrieveProject();
+        }
+        bar.hide();
+    }).saveBrmManagerApproval(np);
+}
+
+function saveBrmAnalystApproval(value) {
+    var bar = $('#progressbar');
+    bar.show();
+    np.projectBrmApproval = value;
+    if (value === true) {
+        np.projectBrmPortfolioManager = valide('brm-port-manager', 'Portfolio Manager is required!');
+        if (np.projectBrmPortfolioManager == false) {
+            bar.hide();
+            return false;
+        }
+    } else {
+        np.projectBrmApprovalComment = valide('brm-comments', 'Comment is required!');
+        if (np.projectBrmApprovalComment == false) {
+            bar.hide();
+            return false;
+        }
+    }
+    np.projectBrmApprovalComment = $('#brm-comments').val();
+    np.projectBrmApprovalComment = np.projectBrmApprovalComment.trim();
+    np.projectBrmApprovalDate = new Date().toString();
+    np.projectBrmApprover = currentUser;
+    if (value == true)
+        np.projectStatus = projectStatus.PROJECT_PRIORITIZATION_FOR_EXECUTION;
+    if (value == false)
+        np.projectStatus = projectStatus.PROJECT_ANALYSIS;
+
+    run.withSuccessHandler(function(obj) {
+        np = obj.np;
+        if (obj.error) {
+            var dialog = document.querySelector('#error-dialog');
+            var dialogText = $('#dialog-text');
+            dialogText.empty();
+            dialogText.append(obj.error);
+            dialog.showModal();
+        } else {
+            var msg = '';
+            var to = '';
+            if (value === true) {
+                msg = 'Your answer has been sent to IT Portfolio Manager.';
+            } else {
+                msg = 'Your answer has been sent back to Requester.';
+            }
+            toast(msg);
+            retrieveProject();
+        }
+        bar.hide();
+    }).saveBrmAnalystApproval(np);
+}
+
+function savePortfolioApproval(value) {
+    var bar = $('#progressbar');
+    bar.show();
+    np.projectITPortfolioApproval = value;
+    if (value === true) {
+        np.projectPm = valide('pa-pm', 'Portfolio Manager is required!');
+        if (np.projectPm == false) {
+            bar.hide();
+            return false;
+        }
+    } else {
+        np.projectITPortfolioComment = valide('pa-comments', 'Comment is required!');
+        if (np.projectITPortfolioComment == false) {
+            bar.hide();
+            return false;
+        }
+    }
+    np.projectITPortfolioComment = $('#pa-comments').val();
+    np.projectITPortfolioComment = np.projectITPortfolioComment.trim();
+    np.projectITPortfolioApprovalDate = new Date().toString();
+    np.projectITPortfolioApprover = currentUser;
+    if (value == true)
+        np.projectStatus = projectStatus.PROJECT_EXECUTION;
+    if (value == false)
+        np.projectStatus = projectStatus.PROJECT_PRIORITIZATION_FOR_EXECUTION;
+
+    run.withSuccessHandler(function(obj) {
+        np = obj.np;
+        if (obj.error) {
+            var dialog = document.querySelector('#error-dialog');
+            var dialogText = $('#dialog-text');
+            dialogText.empty();
+            dialogText.append(obj.error);
+            dialog.showModal();
+        } else {
+            var msg = '';
+            var to = '';
+            if (value === true) {
+                msg = 'Your answer has been sent to Project Manager.';
+            } else {
+                msg = 'Your answer has been sent back to BRM.';
+            }
+            toast(msg);
+            retrieveProject();
+        }
+        bar.hide();
+    }).savePortfolioApproval(np);
+}
+
+function saveProjectManagerRequest(value) {
+    var bar = $('#progressbar');
+    bar.show();
+    np.projectPmApprover = currentUser;
+    np.projectPmComment = $('#pe-comments').val();
+    np.projectPmApprovalDate = new Date().toString();
+    if (value == true) {
+        var sponsorField = $('#pe-sponsor').val();
+        var group = sponsorField.split(' - ');
+        np.projectSponsorName = group[0];
+        np.projectSponsorEmail = group[1];
+
+        np.projectStatus = projectStatus.PROJECT_IN_EVALUATION;
+    }
+    np.projectPmComment = np.projectPmComment.trim();
+    run.withSuccessHandler(function(obj) {
+        np = obj.np;
+        if (obj.error) {
+            var dialog = document.querySelector('#error-dialog');
+            var dialogText = $('#dialog-text');
+            dialogText.empty();
+            dialogText.append(obj.error);
+            dialog.showModal();
+        } else {
+            if (value == true) {
+                toast('The request has been successfully sent for evaluation.');
+            } else {
+                toast('Your comment has been successfully saved!');
+            }
+            retrieveProject();
+        }
+        bar.hide();
+    }).saveProjectManagerRequest(np);
+}
+//============================================================================================================
+function saveFiles() {
+    $('#progressbar').show();
+    $('#attach-add-bt').prop('disabled', true);
+    if (projectID == 0) {
+        toast('Please, save your request before attach your files!');
+        $('#progressbar').hide();
+        $('#attach-add-bt').prop('disabled', false);
+        return false;
+    }
+    np.saveTime = new Date().toString();
+    run.withSuccessHandler(function(obj) {
+        np = obj.np;
+        if (obj.error) {
+            var dialog = document.querySelector('#error-dialog');
+            $('#dialog-text').empty();
+            $('#dialog-text').append(obj.error);
+            dialog.showModal();
+        } else {
+            toast('Your request has been successfully updated!');
+            updateCommentTable(np.comments);
+            componentHandler.upgradeAllRegistered();
+        }
+        $('#attach-add-bt').prop('disabled', false);
+        $('#progressbar').hide();
+        $('#attach-save-bt').hide();
+    }).saveFiles(np);
+}
+//============================================================================================================
+function cancelSectionOpen() {
+    if (np.projectID == 0 && np.projectPlanID != '') {
+        var dialog = document.querySelector('#warning-dialog');
+        $('#dialog-text').text("Do you really want to cancel this request? <br>The operation cannot be undo!");
+        $('#warning-dialog-ok-bt').click(function() {
+            cancelDraft();
+        });
+        dialog.showModal();
+        return false;
+    }
+    if (projectID == 0) {
+        this.localCancel = true;
+        var dialog = document.querySelector('#warning-dialog');
+        $('#dialog-text').text("Do you really want to cancel this request? <br>The operation cannot be undo!");
+        $('#warning-dialog-ok-bt').click(function() {
+            cancelDraft();
+        });
+        dialog.showModal();
+        return false;
+    }
+
+    var dialog = document.querySelector('#warning-dialog');
+    $('#dialog-text').text("Do you really want to cancel this request? If yes, a new card will ask you to fill the Cancelation comment.");
+    $('#warning-dialog-ok-bt').click(function() {
+        cancelCardSetup();
+    });
+    dialog.showModal();
+}
+
+function cancelCardSetup() {
+    hideCardBody('np');
+    hideCardBody('ba');
+    hideCardBody('ia');
+    hideCardBody('pa');
+    hideCardBody('ppe');
+    hideCardBody('pe');
+    $('#section-cancel').show();
+    $('#cancel-control').show();
+    $('#cancel-user-control').hide();
+    $('#cancel-user-answer-tx').hide();
+    $('#cancel-cancel-bt').prop('disabled', false);
+    $('#cancel-save-bt').prop('disabled', false);
+    $('#warning-dialog-ok-bt').click(null);
+    document.querySelector('#warning-dialog').close()
+}
+
+function cancelDraft() {
+    var bar = $('#progressbar');
+    bar.show();
+    document.querySelector('#warning-dialog').close();
+    if (this.localCancel == true) {
+        window.location = this.url;
+        bar.hide();
+        return false;
+    }
+    run.withSuccessHandler(function(obj) {
+        np = obj.np;
+        bar.hide();
+        if (obj.error) {
+            var dialog = document.querySelector('#error-dialog');
+            var dialogText = $('#dialog-text');
+            dialogText.empty();
+            dialogText.append(obj.error);
+            dialog.showModal();
+        } else {
+            window.location = this.url;
+        }
+    }).cancelDraft(np);
+}
+
+function cancelRequest() {
+    if (np.projectID == 0 && np.projectPlanID != '') {
+        var dialog = document.querySelector('#warning-dialog');
+        dialog.showModal();
+        return false;
+    }
+    if (projectID == 0) {
+        toast('Not possible to cancel, first you need save your request!');
+        return false;
+    }
+    var bar = $('#progressbar');
+    bar.show();
+    np.projectCanceled = true;
+    np.projectCanceledDate = new Date().toString();
+    np.projectCanceledAuthor = currentUser;
+    np.projectCanceledAuthorComment = valide('cancel-cancelation-comments', 'Cancelation comment is required!');
+    if (np.projectCanceledAuthor == np.requesterEmail) {
+        np.projectCanceledRequesterAnswer = true;
+    }
+    np.projectCanceledAuthorComment = np.projectCanceledAuthorComment.trim();
+    if (np.projectCanceledAuthorComment == false) {
+        bar.hide();
+        return false;
+    }
+    run.withSuccessHandler(function(obj) {
+        np = obj.np;
+        bar.hide();
+        if (obj.error) {
+            var dialog = document.querySelector('#error-dialog');
+            var dialogText = $('#dialog-text');
+            dialogText.empty();
+            dialogText.append(obj.error);
+            dialog.showModal();
+        } else {
+            toast('Request has been successfully saved!');
+            $('#cancel-control').hide();
+            $('#section-cancel').hide();
+            retrieveProject();
+        }
+    }).cancelRequest(np);
+}
+
+function updateCancelRequest(value) {
+    var bar = $('#progressbar');
+    bar.show();
+    np.projectCanceled = value;
+    np.projectCanceledRequesterAnswer = value;
+    np.projectCanceledRequesterAnswerDate = new Date().toString();
+    np.projectCanceledRequesterAnswerComment = valide('cancel-user-cancelation-comments', 'Cancelation comment is required!');
+    if (np.projectCanceledRequesterAnswerComment == false) {
+        bar.hide();
+        return false;
+    }
+    np.projectCanceledRequesterAnswerComment = np.projectCanceledRequesterAnswerComment.trim();
+    run.withSuccessHandler(function(obj) {
+        np = obj.np;
+        bar.hide();
+        if (obj.error) {
+            var dialog = document.querySelector('#error-dialog');
+            var dialogText = $('#dialog-text');
+            dialogText.empty();
+            dialogText.append(obj.error);
+            dialog.showModal();
+        } else {
+            toast('Request has been successfully saved!');
+            $('#section-cancel').hide();
+            retrieveProject();
+        }
+    }).updateCancelRequest(np);
+}
+
+//============================================================================================================
+function saveEvaluationForm() {
+    var bar = $('#progressbar');
+    bar.show();
+    var question1 = $('input[name="question-1"]:checked').val();
+    var question2 = $('input[name="question-2"]:checked').val();
+    var question3 = $('input[name="question-3"]:checked').val();
+    var question4 = $('input[name="question-4"]:checked').val();
+    var question5 = $('#question-5').val();
+    np.question1 = question1;
+    np.question2 = question2;
+    np.question3 = question3;
+    np.question4 = question4;
+    np.question5 = question5;
+    np.answerDate = new Date().toString();
+    np.projectStatus = projectStatus.FINISHED;
+    run.withSuccessHandler(function(obj) {
+        np = obj.np;
+        bar.hide();
+        if (obj.error) {
+            var dialog = document.querySelector('#error-dialog');
+            var dialogText = $('#dialog-text');
+            dialogText.empty();
+            dialogText.append(obj.error);
+            dialog.showModal();
+        } else {
+            toast('Your answers has been successfully saved!');
+            $('#section-evaluation').hide();
+            retrieveProject();
+        }
+    }).saveEvaluationForm(np);
+}
+//============================================================================================================
+function searchUser(textfield, divAutocomplete, progressBar) {
+    if (CS == 1) {
+        var user = $(textfield).val();
+        if (user.length >= 4) {
+            CS = 0;
+            $(divAutocomplete).empty();
+            $(progressBar).show();
+            run.withSuccessHandler(function(list) {
+                var cList = $(divAutocomplete);
+                var lis = '';
+                for (var i in list) {
+                    var click = "$(\'" + textfield + "\').val(\'" + list[i] + "\');$(\'" + divAutocomplete + "\').hide();";
+                    if (textfield == '#nreq-requester')
+                        click += "retrieveUserInfo();";
+                    if (textfield == '#pe-sponsor') {
+                        document.getElementById('pe-sponsor-div').style.marginBottom = '160px';
+                        click += "document.getElementById(\'pe-sponsor-div\').style.marginBottom = \'27px\';";
+                    }
+                    if (textfield == '#nreq-requesterManager') {
+                        var email = list[i].split(' - ')[1];
+                        click = "$(\'" + textfield + "\').val(\'" + email + "\');$(\'" + divAutocomplete + "\').hide();";
+                    }
+
+                    lis += '<li class="mdl-list__item" onclick="' + click + '">' +
+                        '<span class="mdl-list__item-primary-content">' +
+                        '<i class="material-icons mdl-list__item-icon">person</i>' +
+                        list[i] +
+                        '</span>' +
+                        '</li>';
+                }
+                $(divAutocomplete).show();
+                cList.append(lis);
+                $(progressBar).hide();
+                CS = 1;
+            }).searchUser(user);
+        }
+    }
+}
+//============================================================================================================
+function _getProjectInfo() {
+    np.requester = valide('nreq-requester', 'Requester is required!');
+    if (np.requester == false) return false;
+    np.requesterManager = valide('nreq-requesterManager', 'Manager is required!');
+    var isEmail = emailCheck($('#nreq-requesterManager').val());
+    if (!np.requesterManager || !isEmail) {
+        snackValidation('Please provide a valid Manager\'s email address!', 'nreq-requesterManager');
+        $('#progressbar').hide();
+        return false;
+    }
+
+    //if (np.requesterManager == false) return false;
+
+    np.requesterPhone = valide('nreq-requesterPhone', 'Phone number is required!');
+    if (np.requesterPhone == false) return false;
+
+    np.requesterDepartment = valide('nreq-requesterDepartment', 'Department is required!');
+    if (np.requesterDepartment == false) return false;
+
+    np.requesterLocation = valide('nreq-requesterLocation', 'Location is required!');
+    if (np.requesterLocation == false) return false;
+
+    np.projectName = valide('nreq-prjName', 'Project name is required!');
+    if (np.projectName == false) return false;
+
+    np.projectDesc = valide('nreq-description', 'Description is required!');
+    if (np.projectDesc == false) return false;
+    np.projectDesc = np.projectDesc.trim();
+
+    np.projectBenefits = valide('nreq-benefits', 'Benefits is required!');
+    if (np.projectBenefits == false) return false;
+    np.projectBenefits = np.projectBenefits.trim();
+
+    np.requestDate = new Date().toString();
+    return np;
+}
+
+function _getProjectInfoNoValidation() {
+    np.requester = $('#nreq-requester').val();
+    np.requesterManager = $('#nreq-requesterManager').val();
+    np.requesterPhone = $('#nreq-requesterPhone').val();
+    np.requesterDepartment = $('#nreq-requesterDepartment').val();
+    np.requesterLocation = $('#nreq-requesterLocation').val();
+    np.projectName = $('#nreq-prjName').val();
+    np.projectDesc = $('#nreq-description').val();
+    np.projectBenefits = $('#nreq-benefits').val();
+    np.requestDate = new Date().toString();
+    return np;
+}
+//===========================================================================================================
+function blockNewRequestFields(value) {
+    $('#nreq-requester').prop('readonly', value);
+    $('#nreq-requesterManager').prop('readonly', value);
+    $('#nreq-requesterPhone').prop('readonly', value);
+    $('#nreq-requesterDepartment').prop('readonly', value);
+    $('#nreq-requesterLocation').prop('readonly', value);
+    $('#nreq-prjName').prop('readonly', value);
+    $('#nreq-description').prop('readonly', value);
+    $('#nreq-benefits').prop('readonly', value);
+    $('#prj-save-bt').prop('disabled', value);
+    $('#prj-send-bt').prop('disabled', value);
+    $('#np-cancel-action-bt').prop('disabled', value);
+    if (value === true)
+        $('#np-search-user').hide();
+    else
+        $('#np-search-user').show();
+}
+
+function blockManagerFields(value) {
+    $('#ba-comments').prop('readonly', value);
+    $('#ba-appr-reject-bt').prop('disabled', value);
+    $('#ba-appr-approval-bt').prop('disabled', value);
+    $('#ba-cancel-action-bt').prop('disabled', value);
+}
+
+function blockITManagerFields(value) {
+    $('#ia-brm').prop('disabled', value);
+    $('#ia-comments').prop('readonly', value);
+    $('#ia-appr-reject-bt').prop('disabled', value);
+    $('#ia-appr-approval-bt').prop('disabled', value);
+    $('#ia-cancel-action-bt').prop('disabled', value);
+}
+
+function blockBrmFields(value) {
+    $('#brm-port-manager').prop('disabled', value);
+    $('#brm-comments').prop('readonly', value);
+    $('#brm-appr-reject-bt').prop('disabled', value);
+    $('#brm-appr-approval-bt').prop('disabled', value);
+    $('#brm-cancel-action-bt').prop('disabled', value);
+}
+
+function blockBrmmFields(value) {
+    $('#brmm-brma').prop('disabled', value);
+    $('#brmm-comments').prop('readonly', value);
+    $('#brmm-appr-reject-bt').prop('disabled', value);
+    $('#brmm-appr-approval-bt').prop('disabled', value);
+    $('#brmm-cancel-action-bt').prop('disabled', value);
+}
+
+function blockPortfolioManagerFields(value) {
+    $('#pa-pm').prop('disabled', value);
+    if (value === true) {
+        $('#pa-pm').immybox('destroy');
+    }
+    $('#pa-comments').prop('readonly', value);
+    $('#pa-appr-reject-bt').prop('disabled', value);
+    $('#pa-appr-approval-bt').prop('disabled', value);
+    $('#pa-cancel-action-bt').prop('disabled', value);
+}
+
+function blockProjectManagerFields(value) {
+    $('#pe-sponsor').prop('readonly', value);
+    $('#save-pm-bt').prop('disabled', value);
+    $('#send-evaluation-bt').prop('disabled', value);
+    $('#pe-cancel-action-bt').prop('disabled', value);
+    if (value === true)
+        $('#pe-search-bt').hide();
+    else
+        $('#pe-search-bt').show();
+}
+
+function blockAttachments() {
+    $('#attach-add-bt').prop('disabled', true);
+    $('.delete-bt').remove();
+}
+
+function blockEvaluation() {
+    $('#question-1-yes').prop('disabled', true);
+    $('#question-1-no').prop('disabled', true);
+    $('#question-2-yes').prop('disabled', true);
+    $('#question-2-no').prop('disabled', true);
+    $('#question-3-yes').prop('disabled', true);
+    $('#question-3-no').prop('disabled', true);
+    $('#question-4-1').prop('disabled', true);
+    $('#question-4-2').prop('disabled', true);
+    $('#question-4-3').prop('disabled', true);
+    $('#question-4-4').prop('disabled', true);
+    $('#question-4-5').prop('disabled', true);
+    $('#question-5').prop('readonly', true);
+    $('#evaluation-cancel-bt').prop('disabled', true);
+    $('#evaluation-save-bt').prop('disabled', true);
+}
+//============================================================================================================
+function updateCommentTable(comments) {
+    $('#hist-tb>tbody').empty();
+    componentHandler.upgradeAllRegistered();
+    for (var i = (+comments.length - 1);; i--) {
+        if (i == -1) break;
+        $('#hist-tb>tbody').append('<tr><td class="mdl-data-table__cell--non-numeric">' + moment(new Date(comments[i].date)).format("MM/DD/YYYY hh:mm:ss A") +
+            '</td><td class="mdl-data-table__cell--non-numeric">' + comments[i].commenter +
+            '</td><td class="mdl-data-table__cell--non-numeric" style="white-space: normal;">' + comments[i].comment +
+            '</td></tr>');
+    }
+    componentHandler.upgradeAllRegistered();
+}
+
+function updateAttachmentTable(files) {
+    $('#attachs-tb > tbody').empty();
+    componentHandler.upgradeAllRegistered();
+    for (var i in files) {
+        addFileToTable(files[i], false);
+    }
+    componentHandler.upgradeAllRegistered();
+}
+
+function setIDtoScreen() {
+    var wrap = document.getElementById('id-label');
+    while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
+    $('#id-label').append('ID: ' + np.projectID);
+}
+
+function retrieveCombosDataAndStartPage() {
+    run.withSuccessHandler(function(combos) {
+        $.each(combos.localitmanager, function(index, value) {
+            $('#ia-brm').append($('<option/>', {
+                value: value.value,
+                text: value.display
+            }))
+        });
+        $.each(combos.portfolio, function(index, value) {
+            $('#brm-port-manager').append($('<option/>', {
+                value: value.value,
+                text: value.display
+            }))
+        });
+        componentHandler.upgradeAllRegistered();
+        if (projectID == 0) {
+            setTimeout(function() {
+                document.getElementById('brm-port-manager').selectedIndex = 0;
+            }, 1000);
+            usersCacheAndAutompleteSetup(true);
+            newProject();
+            $('#nreq-requester').focus();
+        } else
+            retrieveProject();
+    }).retrieveCombosData();
+
+}
+//============================================================================================================
+function removeDoc(id) {
+    for (var i = 0; i < np.projectAttachmets.length; i++) {
+        var doc = np.projectAttachmets[i];
+        if (doc.id == id) {
+            np.projectAttachmets.splice(i, 1);
+        }
+    }
+    if (projectID != 0 && np.projectStatus != projectStatus.DRAFT)
+        saveFiles();
+}
+
+function removeRow(o) {
+    var p = o.parentNode.parentNode;
+    p.parentNode.removeChild(p);
+    componentHandler.upgradeAllRegistered();
+}
+
+function setValue(id, value) {
+    var obj = $('#' + id);
+    obj.val(value);
+}
+
+function valide(id, msg) {
+    var value = $('#' + id).val();
+    if (value == '') {
+        snackValidation(msg, id);
+        $('#progressbar').hide();
+        return false;
+    }
+    return value;
+}
+
+function emailCheck(email) {
+    var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+    return regex.test(email);
+}
+
+function toast(msg) {
+    'use strict';
+    var snackbarContainer = document.querySelector('#snackbar');
+    $('#snack-bt').css('display', 'none');
+    var data = {
+        message: msg,
+        timeout: 6000
+    };
+    snackbarContainer.MaterialSnackbar.showSnackbar(data);
+}
+
+function snackValidation(msg, id) {
+    'use strict';
+    var snackbarContainer = document.querySelector('#snackbar');
+    $('#snack-bt').css('display', 'inherit');
+    var handler = function(event) {
+        $('#' + id).focus();
+        snackbarContainer.classList.remove('mdl-snackbar--active');
+        snackbarContainer.setAttribute('aria-hidden', 'true');
+    };
+    var data = {
+        message: msg,
+        timeout: 6000,
+        actionHandler: handler,
+        actionText: 'Fix'
+    };
+    snackbarContainer.MaterialSnackbar.showSnackbar(data);
+}
+
+function showDialog() {
+    var dialog = document.querySelector('dialog');
+    var showDialogButton = document.querySelector('dialog');
+    if (!dialog.showModal) {
+        dialogPolyfill.registerDialog(dialog);
+    }
+}
+
+function hideCardBody(sectionId) {
+    var obj = document.getElementById('collapse-bt-' + sectionId);
+    while (obj.firstChild) obj.removeChild(obj.firstChild);
+    obj.appendChild(document.createTextNode('add_circle_outline'));
+    $('#section-' + sectionId + ' .mdl-card__supporting-text').hide();
+    $('#section-' + sectionId + ' .mdl-card__actions').hide();
+    $('#section-' + sectionId).removeClass('mdl-shadow--8dp');
+    $('#section-' + sectionId).addClass('mdl-shadow--2dp');
+    $('#' + sectionId + '-cancel-action-bt').prop('disabled', true);
+}
+
+function showCardBody(sectionId) {
+    var obj = document.getElementById('collapse-bt-' + sectionId);
+    while (obj.firstChild) obj.removeChild(obj.firstChild);
+    obj.appendChild(document.createTextNode('remove_circle_outline'));
+    $('#section-' + sectionId + ' .mdl-card__supporting-text').show();
+    $('#section-' + sectionId + ' .mdl-card__actions').show();
+    $('#section-' + sectionId).removeClass('mdl-shadow--2dp');
+    $('#section-' + sectionId).addClass('mdl-shadow--8dp');
+    $('#' + sectionId + '-cancel-action-bt').prop('disabled', false);
+}
+
+function toggleCardBody(id) {
+    var obj = document.getElementById('collapse-bt-' + id);
+    while (obj.firstChild) obj.removeChild(obj.firstChild);
+
+    var display = $('#section-' + id + ' .mdl-card__supporting-text').css('display');
+    if (display == 'none')
+        obj.appendChild(document.createTextNode('remove_circle_outline'));
+    else
+        obj.appendChild(document.createTextNode('add_circle_outline'));
+    $('#section-' + id + ' .mdl-card__supporting-text').toggle();
+    $('#section-' + id + ' .mdl-card__actions').toggle();
+}
+
+function cleanAndIncludeNewIcon(id, icon) {
+    var step = $('#' + id);
+    step.empty();
+    step.append('<i class="material-icons">' + icon + '</i>');
+}
+
+function hideSections() {
+    $('#section-ba').hide();
+    $('#section-ia').hide();
+    $('#section-ppe').hide();
+    $('#section-pa').hide();
+}
+//===========================================================================================================
+//============================================================================================================
+function usersCacheAndAutompleteSetup(all) {
+    $('#nreq-requesterLocation').immybox({
+        choices: this.locationPlants,
+        cleanAtStart: false,
+        dialog: false,
+        showArrow: true,
+        resultPanel: 'resultsLocation',
+        maxResults: 8,
+        formatChoice(query) {
+            const reg = new RegExp("(" + query + ")", 'i');
+            return choice => (
+                "<div class='mdl-grid mdl-grid--no-spacing'>" +
+                "<div class='mdl-cell mdl-cell--12-col'>" + choice.text.replace(reg, "<u>$1</u>") +
+                "</div>" +
+                "</div>");
+        },
+        onSelect(selectedChoice) {
+            setValue('nr-reviewer', selectedChoice.value);
+        },
+        openOnClick: true
+    });
+    run.withSuccessHandler(function(list) {
+        this.usersCache = list;
+        if (all == true) {
+            $('#nreq-requester').immybox({
+                choices: this.usersCache,
+                cleanAtStart: false,
+                dialog: false,
+                showArrow: true,
+                resultPanel: 'resultsRequester',
+                maxResults: 8,
+                formatChoice(query) {
+                    const reg = new RegExp("(" + query + ")", 'i');
+                    return choice => (
+                        "<div class='mdl-grid mdl-grid--no-spacing'>" +
+                        "<div class='mdl-cell mdl-cell--12-col'>" + [choice.text.replace(reg, "<u>$1</u>"),
+                            choice.value.replace(reg, "<u>$1</u>")
+                        ].join(", ") +
+                        "</div>" +
+                        "</div>");
+                },
+                onSelect(selectedChoice) {
+                    setValue('nreq-requester', selectedChoice.text + ' - ' + selectedChoice.value);
+                    retrieveUserInfo();
+                },
+                openOnClick: true
+            });
+            $('#nreq-requesterManager').immybox({
+                choices: this.usersCache,
+                cleanAtStart: false,
+                dialog: false,
+                showArrow: false,
+                resultPanel: 'resultsRequesterManager',
+                maxResults: 8,
+                formatChoice(query) {
+                    const reg = new RegExp("(" + query + ")", 'i');
+                    return choice => (
+                        "<div class='mdl-grid mdl-grid--no-spacing'>" +
+                        "<div class='mdl-cell mdl-cell--12-col'>" + [choice.text.replace(reg, "<u>$1</u>"),
+                            choice.value.replace(reg, "<u>$1</u>")
+                        ].join(", ") +
+                        "</div>" +
+                        "</div>");
+                },
+                onSelect(selectedChoice) {
+                    setValue('nreq-requesterManager', selectedChoice.value);
+                },
+                openOnClick: false
+            });
+        }
+        $('#pe-sponsor').immybox({
+            choices: this.usersCache,
+            cleanAtStart: false,
+            dialog: false,
+            showArrow: true,
+            resultPanel: 'resultsSponsor',
+            maxResults: 8,
+            formatChoice(query) {
+                const reg = new RegExp("(" + query + ")", 'i');
+                return choice => (
+                    "<div class='mdl-grid mdl-grid--no-spacing'>" +
+                    "<div class='mdl-cell mdl-cell--12-col'>" + [choice.text.replace(reg, "<u>$1</u>"),
+                        choice.value.replace(reg, "<u>$1</u>")
+                    ].join(", ") +
+                    "</div>" +
+                    "</div>");
+            },
+            onSelect(selectedChoice) {
+                setValue('pe-sponsor', selectedChoice.text + ' - ' + selectedChoice.value);
+            },
+            openOnClick: false
+        });
+
+    }).usersCache();
+}
+
+
+function usersCacheAndComboSetup(field, resultPanel) {
+    if (this.usersCache.length == 0) {
+        run.withSuccessHandler(function(list) {
+            this.usersCache = list;
+
+            $('#' + field).immybox({
+                choices: this.usersCache,
+                cleanAtStart: false,
+                dialog: false,
+                showArrow: true,
+                resultPanel: resultPanel,
+                maxResults: 8,
+                formatChoice(query) {
+                    const reg = new RegExp("(" + query + ")", 'i');
+                    return choice => (
+                        "<div class='mdl-grid mdl-grid--no-spacing'>" +
+                        "<div class='mdl-cell mdl-cell--12-col'>" + [choice.text.replace(reg, "<u>$1</u>"),
+                            choice.value.replace(reg, "<u>$1</u>")
+                        ].join(", ") +
+                        "</div>" +
+                        "</div>");
+                },
+                onSelect(selectedChoice) {
+                    setValue(field, selectedChoice.value);
+                },
+                openOnClick: false
+            });
+        }).usersCache();
+
+    } else {
+
+        $('#' + field).immybox({
+            choices: this.usersCache,
+            cleanAtStart: false,
+            dialog: false,
+            showArrow: true,
+            resultPanel: resultPanel,
+            maxResults: 8,
+            formatChoice(query) {
+                const reg = new RegExp("(" + query + ")", 'i');
+                return choice => (
+                    "<div class='mdl-grid mdl-grid--no-spacing'>" +
+                    "<div class='mdl-cell mdl-cell--12-col'>" + [choice.text.replace(reg, "<u>$1</u>"),
+                        choice.value.replace(reg, "<u>$1</u>")
+                    ].join(", ") +
+                    "</div>" +
+                    "</div>");
+            },
+            onSelect(selectedChoice) {
+                setValue(field, selectedChoice.value);
+            },
+            openOnClick: false
+        });
+
+
+    }
+}
+//============================================================================================================
+document.getElementById('prj-save-bt').onclick = function() {
+    this.disabled = true;
+    document.getElementById('prj-send-bt').disabled = true;
+    document.getElementById('np-cancel-action-bt').disabled = true;
+    saveDraft();
+}
+document.getElementById('prj-send-bt').onclick = function() {
+    document.getElementById('prj-save-bt').disabled = true;
+    document.getElementById('prj-send-bt').disabled = true;
+    document.getElementById('np-cancel-action-bt').disabled = true;
+    sendNewRequestToApproval();
+}
+
+document.getElementById('ba-appr-approval-bt').onclick = function() {
+    saveProjectApproval(true);
+}
+document.getElementById('ba-appr-reject-bt').onclick = function() {
+    saveProjectApproval(false);
+}
+document.getElementById('ia-appr-approval-bt').onclick = function() {
+    saveITManagerApproval(true);
+}
+document.getElementById('ia-appr-reject-bt').onclick = function() {
+    saveITManagerApproval(false);
+}
+document.getElementById('brm-appr-approval-bt').onclick = function() {
+    saveBrmAnalystApproval(true);
+}
+document.getElementById('brmm-appr-reject-bt').onclick = function() {
+    saveBrmManagerApproval(false);
+}
+document.getElementById('brmm-appr-approval-bt').onclick = function() {
+    saveBrmManagerApproval(true);
+}
+document.getElementById('brm-appr-reject-bt').onclick = function() {
+    saveBrmAnalystApproval(false);
+}
+document.getElementById('pa-appr-approval-bt').onclick = function() {
+    savePortfolioApproval(true);
+}
+document.getElementById('pa-appr-reject-bt').onclick = function() {
+    savePortfolioApproval(false);
+}
+document.getElementById('save-pm-bt').onclick = function() {
+    saveProjectManagerRequest(false);
+}
+document.getElementById('send-evaluation-bt').onclick = function() {
+    saveProjectManagerRequest(true);
+}
+document.getElementById('cancel-cancel-bt').onclick = function() {
+    $('#section-cancel').hide();
+    retrieveProject();
+}
+document.getElementById('cancel-reject-bt').onclick = function() {
+    updateCancelRequest(false);
+}
+document.getElementById('cancel-approve-bt').onclick = function() {
+    updateCancelRequest(true);
+}
+document.getElementById('cancel-save-bt').onclick = function() {
+    cancelRequest();
+}
+document.getElementById('evaluation-save-bt').onclick = function() {
+    saveEvaluationForm()
+}
+//============================================================================================================
+//============================================================================================================
+window.addEventListener('load', function() {
+    retrieveCombosDataAndStartPage();
+});
+</script> <script type="text/javascript" src="https://apis.google.com/js/api.js?onload=onApiLoad"></script>
