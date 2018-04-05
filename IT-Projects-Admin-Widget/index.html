@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.2.1/material.teal-orange.min.css">
+    <?!= include('css.html'); ?>
+</head>
+
+<body class="mdl-demo mdl-color-text--grey-700 mdl-base">
+   <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+        <header class="mdl-layout__header" style="background-color: inherit;box-shadow: inherit;">
+            <div class="mdl-layout__tab-panel is-active" id="overview">
+                <section id="section-fr" class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
+                    <div class="mdl-card">
+                        <div class="mdl-card__title">
+                             <div style="width:100%">
+                                <div style="float:left;width:80%;">
+                                   <h2 class="mdl-card__title-text">Search Request</h2>
+                                </div>
+                                <div style="float:left;width:20%;text-align:right;">
+                                <a class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" target="_blank" href="https://script.google.com/a/macros/embraco.com/s/AKfycbySNx1efeFJhlyPFzWDW5GPf3KFxLNket8U2KXDZxjH0WWA_c8/exec">New Request</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mdl-card__supporting-text">
+                            <div class="mdl-grid">
+                                <div class="mdl-cell mdl-cell--1-col">
+                                    <div class="mdl-textfield mdl-js-textfield">
+                                        <input class="mdl-textfield__input" type="text" id="fr-rq-id">
+                                        <label class="mdl-textfield__label mdl-label-float" for="fr-rq-id">Request ID</label>
+                                        <span class="mdl-textfield__error" id="idNotFound">Request&nbsp;not&nbsp;found!</span>
+                                    </div>
+                                </div>
+                                <div class="mdl-cell mdl-cell--3-col">
+                                    <div class="mdl-textfield mdl-js-textfield">
+                                        <input class="mdl-textfield__input" type="text" id="fr-title">
+                                        <label class="mdl-textfield__label mdl-label-float" for="fr-title">Title</label>
+                                    </div>
+                                </div>
+                                <div class="mdl-cell mdl-cell--4-col">
+                                    <div class="mdl-textfield mdl-js-textfield">
+                                        <select class="mdl-textfield__input" id="fr-status">
+                                        <option value="">OPEN</option>
+                                        <option value="DRAFT">DRAFT</option>
+                                        <option value="LOCAL AREA MANAGER APPROVAL">LOCAL AREA MANAGER APPROVAL</option>
+                                        <option value="LOCAL IT MANAGER APPROVAL">IT BUSINESS DEVELOPMENT MANAGER</option>
+                                        <option value="BUSINESS RELATIONSHIP MANAGER">BUSINESS RELATIONSHIP MANAGER</option>
+                                        <option value="BRM ANALYST">BRM Analyst</option>
+                                        <option value="IT PORTFOLIO MANAGER APPROVAL">IT PORTFOLIO MANAGER APPROVAL</option>
+                                        <option value="PROJECT MANAGER">PROJECT MANAGER</option>
+                                        <option value="PROJECT IN EVALUATION">PROJECT IN EVALUATION</option>
+                                        <option value="FINISHED">FINISHED</option>
+                                        <option value="CANCELED">CANCELED</option>
+                                        </select>
+                                        <label class="mdl-textfield__label mdl-label-float" for="fr-status">Status</label>
+                                    </div>
+                                </div>
+                                <div class="mdl-cell mdl-cell--2-col">
+                                    <div class="mdl-textfield mdl-js-textfield">
+                                        <select class="mdl-textfield__input" id="fr-plant">
+                                           <option value=""></option>
+                                           <option value="BRAZIL">BRAZIL</option>
+                                           <option value="MEXICO">MEXICO</option>
+                                           <option value="USA">USA</option>
+                                           <option value="BEIJING CHINA">BEIJING CHINA</option>
+                                           <option value="QD CHINA">QD CHINA</option>
+                                           <option value="ITALY">ITALY</option>
+                                           <option value="SLOVAKIA">SLOVAKIA</option>
+                                           <option value="RUSSIA">RUSSIA</option>
+                                        </select>
+                                        <label class="mdl-textfield__label mdl-label-float" for="fr-plant">Plant</label>
+                                    </div>
+                                </div>
+                                <div class="mdl-cell mdl-cell--2-col">
+                                   <button id="fr-advanced-bt" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" style="min-width: 40px;" title="Advanced Filters" onclick="toggleAdvancedPlanel();"><i class="material-icons">tune</i></button>
+                                   <button id="fr-clear-bt" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" style="min-width: 40px;"><i class="material-icons">delete_forever</i></button>
+                                   <button id="fr-search-bt" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" style="min-width: 40px;"><i class="material-icons">search</i></button>
+                                </div>
+                                <div id="advanced-panel" style="display:none" class="mdl-cell mdl-cell--12-col">
+                                <div class="mdl-grid">
+                                <div class="mdl-cell mdl-cell--3-col">
+                                    <div class="mdl-textfield mdl-js-textfield">
+                                        <input class="mdl-textfield__input" type="text" id="fr-requester">
+                                        <label class="mdl-textfield__label mdl-label-float" for="fr-requester">Requester</label>
+                                    </div>
+                                    <div id="resultsRequester"></div>
+                                </div>
+                                <div class="mdl-cell mdl-cell--3-col">
+                                    <div class="mdl-textfield mdl-js-textfield">
+                                        <input class="mdl-textfield__input" type="text" id="fr-manager">
+                                        <label class="mdl-textfield__label mdl-label-float" for="fr-manager">Manager</label>
+                                    </div>
+                                    <div id="resultsManager"></div>
+                                </div>
+                                <div class="mdl-cell mdl-cell--3-col">
+                                    <div class="mdl-textfield mdl-js-textfield">
+                                        <input class="mdl-textfield__input" type="text" id="fr-local-it">
+                                        <label class="mdl-textfield__label mdl-label-float" for="fr-local-it">Local IT Manager</label>
+                                    </div>
+                                    <div id="resultsLocalIt"></div>
+                                </div>
+                                <div class="mdl-cell mdl-cell--3-col">
+                                    <div class="mdl-textfield mdl-js-textfield">
+                                        <input class="mdl-textfield__input" type="text" id="fr-brm">
+                                        <label class="mdl-textfield__label mdl-label-float" for="fr-brm">BRM</label>
+                                    </div>
+                                    <div id="resultsBrm"></div>
+                                </div>
+                                <div class="mdl-cell mdl-cell--3-col">
+                                    <div class="mdl-textfield mdl-js-textfield">
+                                        <input class="mdl-textfield__input" type="text" id="fr-portfolio">
+                                        <label class="mdl-textfield__label mdl-label-float" for="fr-portfolio">IT Portfolio Manager</label>
+                                    </div>
+                                    <div id="resultsPortfolio"></div>
+                                </div>
+                                <div class="mdl-cell mdl-cell--3-col">
+                                    <div class="mdl-textfield mdl-js-textfield">
+                                        <input class="mdl-textfield__input" type="text" id="fr-pm">
+                                        <label class="mdl-textfield__label mdl-label-float" for="fr-pm">Project Manager</label>
+                                    </div>
+                                    <div id="resultsPm"></div>
+                                </div>
+                                <div class="mdl-cell mdl-cell--3-col">
+                                    <div class="mdl-textfield mdl-js-textfield">
+                                        <input class="mdl-textfield__input" type="text" id="fr-sponsor">
+                                        <label class="mdl-textfield__label mdl-label-float" for="fr-sponsor">Sponsor</label>
+                                    </div>
+                                    <div id="resultsSponsor"></div>
+                                </div>
+                                <div class="mdl-cell mdl-cell--3-col">
+                                </div>
+
+                                <div class="mdl-cell mdl-cell--3-col">
+                                    <div class="mdl-textfield mdl-js-textfield">
+                                        <input class="mdl-textfield__input" type="text" id="fr-start-date">
+                                        <label class="mdl-textfield__label mdl-label-float" for="fr-start-date">Start Date</label>
+                                    </div>
+                                    <div id="resultsAffectedSystems"></div>
+                                </div>
+                                <div class="mdl-cell mdl-cell--3-col">
+                                    <div class="mdl-textfield mdl-js-textfield">
+                                        <input class="mdl-textfield__input" type="text" id="fr-end-date">
+                                        <label class="mdl-textfield__label mdl-label-float" for="fr-end-date">End Date</label>
+                                    </div>
+                                    <div id="resultsAffectedSystems"></div>
+                                </div>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="progress-load" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
+                </section>
+             </div>
+        </header>
+        <main class="mdl-layout__content">
+            <div class="mdl-layout__tab-panel is-active" id="overview">
+                <section id="section-np" class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
+
+                    <div class="mdl-card">
+                        <div class="mdl-card__title">
+                                   <h2 class="mdl-card__title-text">All IT Project Requests</h2>
+                        </div>
+                        <div class="mdl-card__supporting-text" style="overflow-x: auto;">
+                            <div class="mdl-grid">
+                                <div class="mdl-cell mdl-cell--12-col">
+                                    <table class="mdl-data-table mdl-js-data-table mdl-shadow--0dp" style="width: 100%;" id="requests-tb">
+                                    <thead>
+                                     <tr>
+                                       <th style="width: 100px;">Request ID</th>
+                                       <th class="mdl-data-table__cell--non-numeric">Status</th>
+                                       <th class="mdl-data-table__cell--non-numeric">Currently with</th>
+                                       <th class="mdl-data-table__cell--non-numeric">Start date</th>
+                                       <th class="mdl-data-table__cell--non-numeric">Manager</th>
+                                       <th class="mdl-data-table__cell--non-numeric">Title</th>
+                                       <th class="mdl-data-table__cell--non-numeric">Plant</th>
+                                       <th class="mdl-data-table__cell--non-numeric">Last update</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    </tbody>
+                                    <tfoot>
+                                      <tr>
+                                        <td colspan='4' style="text-align: left;">
+                                          <a onclick="exportToSheets();" style="cursor: pointer;">
+                                            <img src="https://www.gstatic.com/images/icons/material/product/2x/sheets_24dp.png" style="width: 20px;margin-bottom: 5px;"/>
+                                            <span>Export to Google Sheets</span>
+                                          </a>
+                                        </td>
+                                        <td colspan='4'>
+                                           Page:  <span id="currentPage"></span> from <span id="lastPage"></span>
+                                            - Total: <span id="total"></span>
+                                           <button id="firstpage" class="mdl-button mdl-js-button mdl-button--icon" onclick="firstPage()">
+                                              <i class="material-icons">first_page</i>
+                                           </button>
+                                           <button id="previouspage" class="mdl-button mdl-js-button mdl-button--icon" onclick="previousPage()" >
+                                              <i class="material-icons">chevron_left</i>
+                                           </button>
+                                           <button id="nextpage" class="mdl-button mdl-js-button mdl-button--icon" onclick="nextPage()">
+                                              <i class="material-icons">chevron_right</i>
+                                           </button>
+                                           <button id="lastpage" class="mdl-button mdl-js-button mdl-button--icon" onclick="lastPagee()">
+                                              <i class="material-icons">last_page</i>
+                                           </button>
+                                        </td>
+                                      </tr>
+                                    </tfoot>
+                                    </table>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <dialog class="mdl-dialog" id="error-dialog">
+                    <h4 class="mdl-dialog__title">Ops...</h4>
+                    <div class="mdl-dialog__content">
+                        <div id="dialog-text"></div>
+                        <div>Please try again or contact the administrator.</div>
+                    </div>
+                    <div class="mdl-dialog__actions">
+                        <button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" onclick="document.querySelector('#error-dialog').close()">OK</button>
+                    </div>
+                </dialog>
+                <dialog class="mdl-dialog" id="url-dialog">
+                    <h4 class="mdl-dialog__title">Your Export</h4>
+                    <div class="mdl-dialog__content">
+                        <div id="dialog-url-text"></div>
+                    </div>
+                    <div class="mdl-dialog__actions">
+                        <button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" onclick="document.querySelector('#url-dialog').close()">OK</button>
+                    </div>
+                </dialog>
+            </div>
+        </main>
+   </div>
+</body>
+<script src="https://code.getmdl.io/1.2.1/material.min.js" ></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js" ></script>
+<script src="https://storage.googleapis.com/embraco-it-apps.appspot.com/inputMask/inputmask.min.js"></script>
+<script src="https://storage.googleapis.com/embraco-it-apps.appspot.com/inputMask/jquery.inputmask.bundle.min.js"></script>
+<script src="https://storage.googleapis.com/embraco-it-apps.appspot.com/inputMask/inputmask.date.extensions.min.js"></script>
+<script src="https://storage.googleapis.com/embraco-it-apps.appspot.com/moments/moments.js"></script>
+<?!= include('autocomplete.html'); ?>
+<script type="text/javascript">
+var requestsPage;
+var per_page = 25;
+var gpage = 1;
+var lastPage = 1;
+var filtered = false;
+var total = 0;
+var advancedPanelHide = true;
+var run = google.script.run.withFailureHandler(onFailure);
+
+function onFailure(e) {
+    debugger;
+    var dialog = document.querySelector('#error-dialog');
+    $('#dialog-text').empty();
+    $('#dialog-text').append(e);
+    $('#progress-project-execution').hide();
+    $('#progress-load').hide();
+    $('#progress-load-ba').hide();
+    dialog.showModal();
+}
+
+function dataOnGoingDB(page){
+    console.log('page:'+page);
+    $('#progress-load').show();
+    $('#requests-tb>tbody').empty();
+    componentHandler.upgradeAllRegistered();
+    run.withSuccessHandler(function(obj) {
+       requestsPage = obj.data;
+       total = obj.total;
+       lastPage = obj.last;
+       fillTable(requestsPage);
+       document.getElementById('firstpage').disabled = false;
+       document.getElementById('previouspage').disabled = false;
+       document.getElementById('nextpage').disabled = false;
+       document.getElementById('lastpage').disabled = false;
+       if(page == 1){
+         document.getElementById('firstpage').disabled = true;
+         document.getElementById('previouspage').disabled = true;
+         document.getElementById('nextpage').disabled = false;
+         document.getElementById('lastpage').disabled = false;
+       }
+
+       if(page == lastPage){
+         document.getElementById('firstpage').disabled = false;
+         document.getElementById('previouspage').disabled = false;
+         document.getElementById('nextpage').disabled = true;
+         document.getElementById('lastpage').disabled = true;
+       }
+
+       if(page == 1 && page == lastPage){
+         document.getElementById('firstpage').disabled = true;
+         document.getElementById('previouspage').disabled = true;
+         document.getElementById('nextpage').disabled = true;
+         document.getElementById('lastpage').disabled = true;
+       }
+
+       if(requestsPage.length < per_page || requestsPage.length == total){
+         document.getElementById('firstpage').disabled = true;
+         document.getElementById('previouspage').disabled = true;
+         document.getElementById('nextpage').disabled = true;
+         document.getElementById('lastpage').disabled = true;
+       }
+       $('#progress-load').hide();
+    }).dataOnGoingDB(page);
+}
+function getTotalLength(){
+    run.withSuccessHandler(function(obj) {
+       this.total = obj.total;
+       $('#currentPage').text(gpage);
+       $('#lastPage').text(obj.last);
+       this.lastPage = obj.last;
+       $('#total').text(this.total);
+       if(per_page >= this.total){
+          document.getElementById('firstpage').disabled = true;
+          document.getElementById('previouspage').disabled = true;
+          document.getElementById('nextpage').disabled = true;
+          document.getElementById('lastpage').disabled = true;
+       }
+    }).getTotalLength();
+}
+function fillTable(obj){
+     for (var i in obj) {
+          var row = '<tr>'+
+          '<!-- <td class="mdl-data-table__cell--non-numeric">'+
+          '<label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="cb-request-'+obj[i].id+'">'+
+          '<input type="checkbox" id="cb-request-'+obj[i].id+'" class="mdl-checkbox__input">'+
+          '<span class="mdl-checkbox__label"></span>'+
+          '</label>'+
+          '</td> -->'+
+          '<td><a href="'+obj[i].url+'" target="_blank">'+obj[i].id+'</a></td>'+
+          '<td class="mdl-data-table__cell--non-numeric" style="white-space: normal;">'+obj[i].status+'</td>'+
+          '<td class="mdl-data-table__cell--non-numeric">'+obj[i].currentResponsible+'</td>'+
+          '<td class="mdl-data-table__cell--non-numeric">'+obj[i].startDate+'</td>'+
+          '<td class="mdl-data-table__cell--non-numeric">'+obj[i].manager+'</td>'+
+          '<td class="mdl-data-table__cell--non-numeric" style="white-space: normal;">'+obj[i].title+'</td>'+
+          '<td class="mdl-data-table__cell--non-numeric">'+obj[i].plant+'</td>'+
+          '<td class="mdl-data-table__cell--non-numeric">'+obj[i].lastUpdate+'</td>'+
+          '</tr>';
+          $('#requests-tb>tbody').append(row);
+       }
+       componentHandler.upgradeAllRegistered();
+}
+function showNotFound(msg) {
+    $('#idNotFound').css('visibility', 'visible');
+}
+function searchRequest(page){
+    console.log('Search page: '+page);
+    $('#progress-load').show();
+    $('#requests-tb>tbody').empty();
+    this.filtered = true;
+    componentHandler.upgradeAllRegistered();
+    var filter = getFilterFields();
+    run.withSuccessHandler(function(obj) {
+       if (obj.total == 0){
+          $('#idNotFound').css('visibility', 'visible');
+          $('#total').text(obj.total);
+       }
+       else {
+          requestsPage = obj.data;
+          $('#idNotFound').css('visibility', 'hidden');
+          var data = obj.data;
+          this.total = obj.total;
+          fillTable(data);
+          $('#total').text(this.total);
+          this.lastPage = obj.last;
+          $('#lastPage').text(this.lastPage);
+          document.getElementById('firstpage').disabled = false;
+          document.getElementById('previouspage').disabled = false;
+          document.getElementById('nextpage').disabled = false;
+          document.getElementById('lastpage').disabled = false;
+          if(page == 1){
+            document.getElementById('firstpage').disabled = true;
+            document.getElementById('previouspage').disabled = true;
+            document.getElementById('nextpage').disabled = false;
+            document.getElementById('lastpage').disabled = false;
+          }
+
+          if(page == lastPage){
+             document.getElementById('firstpage').disabled = false;
+             document.getElementById('previouspage').disabled = false;
+             document.getElementById('nextpage').disabled = true;
+             document.getElementById('lastpage').disabled = true;
+          }
+
+          if(page == 1 && page == lastPage){
+             document.getElementById('firstpage').disabled = true;
+             document.getElementById('previouspage').disabled = true;
+             document.getElementById('nextpage').disabled = true;
+             document.getElementById('lastpage').disabled = true;
+          }
+
+          if(requestsPage.length < per_page || requestsPage.length == total){
+             document.getElementById('firstpage').disabled = true;
+             document.getElementById('previouspage').disabled = true;
+             document.getElementById('nextpage').disabled = true;
+             document.getElementById('lastpage').disabled = true;
+          }
+       }
+       $('#progress-load').hide();
+    }).searchRequest(filter, page);
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------
+// PAGINATION   --------------------------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------------------------------------------
+function firstPage(){
+   gpage = Number(1);
+   if(this.filtered == false)
+      dataOnGoingDB(gpage);
+   else
+      searchRequest(gpage);
+   $('#currentPage').text(gpage);
+   console.log('Page: '+gpage);
+}
+function previousPage(){
+   gpage = Number(gpage)-Number(1);
+   if(this.filtered == false)
+      dataOnGoingDB(gpage);
+   else
+      searchRequest(gpage);
+   $('#currentPage').text(gpage);
+   console.log('Page: '+gpage);
+}
+function nextPage(){
+   gpage = Number(gpage)+Number(1);
+   if(this.filtered == false)
+      dataOnGoingDB(gpage);
+   else
+      searchRequest(gpage);
+   $('#currentPage').text(gpage);
+   console.log('Page: '+gpage);
+}
+
+function lastPagee(){
+   gpage = this.lastPage;
+   if(this.filtered == false)
+      dataOnGoingDB(gpage);
+   else
+      searchRequest(gpage);
+   $('#currentPage').text(gpage);
+   console.log('Page: '+gpage);
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------
+function exportToSheets(){
+    $('#progress-load').show();
+    var filter = getFilterFields();
+    run.withSuccessHandler(function(url) {
+      var dialog = document.querySelector('#url-dialog');
+      $('#dialog-url-text').empty();
+      $('#dialog-url-text').append('<a href="'+url+'" target="_blank">Click here to open your report</a>');
+      dialog.showModal();
+      $('#progress-load').hide();
+    }).exportToSheets(filter);
+
+}
+function getFilterFields(){
+   var filter = {};
+   filter.id = $('#fr-rq-id').val();
+   filter.title = $('#fr-title').val();
+   filter.status = $('#fr-status').val();
+   filter.plant = $('#fr-plant').val();
+   filter.requester = $('#fr-requester').val();
+   filter.manager = $('#fr-manager').val();
+   filter.localIT = $('#fr-local-it').val();
+   filter.brm = $('#fr-brm').val();
+   filter.portfolio = $('#fr-portfolio').val();
+   filter.pm = $('#fr-pm').val();
+   filter.startDate = $('#fr-start-date').val();
+   filter.endDate = $('#fr-end-date').val();
+   return filter;
+}
+
+function cleanFilters(){
+  this.filtered = false;
+  $('#fr-rq-id').val('');
+  $('#fr-title').val('');
+  $('#fr-status').val('');
+  $('#fr-plant').val('');
+  $('#fr-requester').val('');
+  $('#fr-manager').val('');
+  $('#fr-local-it').val('');
+  $('#fr-brm').val('');
+  $('#fr-portfolio').val('');
+  $('#fr-pm').val('');
+  $('#fr-sponsor').val('');
+  $('#fr-start-date').val('');
+  $('#fr-end-date').val('');
+}
+
+function toggleAdvancedPlanel(){
+  if (advancedPanelHide == true){
+    $('#advanced-panel').slideDown();
+    this.advancedPanelHide = false;
+  }
+  else {
+    cleanFilters();
+    $('#advanced-panel').slideUp();
+    this.advancedPanelHide = true;
+  }
+}
+
+function setupAutocomplete(){
+    var bar = $('#progress-load');
+    bar.show();
+    run.withSuccessHandler(function(list) {
+        this.usersCache = list;
+        bar.hide();
+        var fields = [{id:'fr-requester', results:'resultsRequester'},{id:'fr-manager', results:'resultsManager'},{id:'fr-local-it', results:'resultsLocalIt'},{id:'fr-brm', results:'resultsBrm'},{id:'fr-portfolio', results:'resultsPortfolio'},{id:'fr-pm', results:'resultsPm'},{id:'fr-sponsor', results:'resultsSponsor'}];
+        for(var i in fields){
+          $('#'+fields[i].id).immybox({
+            choices: this.usersCache,
+            cleanAtStart: false,
+            dialog: false,
+            showArrow: true,
+            resultPanel: fields[i].results,
+            maxResults: 8,
+            formatChoice(query) {
+                const reg = new RegExp("(" + query + ")", 'i');
+                return choice => (
+                    "<div class='mdl-grid mdl-grid--no-spacing'>" +
+                    "<div class='mdl-cell mdl-cell--12-col'>" + [choice.text.replace(reg, "<u>$1</u>"),
+                        choice.value.replace(reg, "<u>$1</u>")
+                    ].join(", ") +
+                    "</div>" +
+                    "</div>");
+            },
+            onSelect(selectedChoice) {
+            },
+            openOnClick: true
+          });
+          fields[i].id
+        }
+        bar.hide();
+     }).usersCache();
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------------------------------------------
+window.addEventListener('load', function() {
+    $("#fr-start-date").inputmask({ alias: "mm/dd/yyyy"});
+    $("#fr-end-date").inputmask({ alias: "mm/dd/yyyy"});
+    setupAutocomplete();
+    $('#fr-search-bt').click(function() {
+       gpage = 1;
+       $('#currentPage').text(gpage);
+       searchRequest(gpage);
+    });
+    $('#fr-rq-id').keypress(function(e) {
+        if(e.which == 13) {
+           gpage = 1;
+           $('#currentPage').text(gpage);
+           searchRequest(gpage);
+    } });
+    $('#fr-title').keypress(function(e) {
+        if(e.which == 13) {
+           gpage = 1;
+           $('#currentPage').text(gpage);
+           searchRequest(gpage);
+        } });
+    $('#fr-clear-bt').click(function() {
+       gpage = 1;
+       $('#currentPage').text(gpage);
+       cleanFilters();
+       $('#idNotFound').css('visibility', 'hidden');
+    });
+});
+</script>
+</html>
