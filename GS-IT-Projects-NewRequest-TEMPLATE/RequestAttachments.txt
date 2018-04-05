@@ -1,0 +1,6 @@
+----------------------------
+
+HeaderPosition: A2
+HeaderValues: attachName | attachDate | attachUrl | attachIcon | attachAuthor | attachID
+
+-----------------------------
