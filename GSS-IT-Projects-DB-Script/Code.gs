@@ -22,7 +22,7 @@ function onOpen(){
   menu.addItem('Archive old Requests', 'archiveOldRequests');
   menu.addSeparator()
   menu.addItem('Change Local Area Manager', 'changeManager');
-  menu.addItem('Change Local IT Manager', 'changeITLocalManager');
+  menu.addItem('Change IT Project Prioritization Forum', 'changeITLocalManager');
   menu.addItem('Change IT Manager Approval', 'changeBRM');
   menu.addItem('Change IT Project Leader Analysis', 'changeBRMAnalyst');
   menu.addItem('Change IT Portfolio Manager', 'changePortfolio');
