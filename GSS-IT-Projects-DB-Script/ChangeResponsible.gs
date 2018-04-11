@@ -17,7 +17,7 @@ function changeITLocalManager() {
 function changeBRM() {
   var active = SpreadsheetApp.getActiveSheet();
   var row = active.getActiveCell().getRow();
-  if(active.getRange(row, 2).getValue() == 'BUSINESS RELATIONSHIP MANAGER')
+  if(active.getRange(row, 2).getValue() == 'IT MANAGER APPROVAL')
   changeCore('projectBrm', 'B21');
   else
     SpreadsheetApp.getUi().alert('Alert', 'Unable to change a step already approved!', SpreadsheetApp.getUi().ButtonSet.OK);
@@ -98,7 +98,7 @@ function getStatusString(status){
         case projectStatus.IT_APPROVAL:
             return 'IT PROJECT PRIORITIZATION FORUM';
         case projectStatus.BRM_MANAGERS:
-            return 'BUSINESS RELATIONSHIP MANAGER';
+            return 'IT MANAGER APPROVAL';
         case projectStatus.PROJECT_ANALYSIS:
             return 'BRM ANALYST';
         case projectStatus.PROJECT_PRIORITIZATION_FOR_EXECUTION:

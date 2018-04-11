@@ -622,7 +622,7 @@ function saveITManagerApproval(value) {
     bar.show();
     np.projectITApproval = value;
     if (value === true) {
-        np.projectBrm = valide('ia-brm', 'BRM is required!');
+        np.projectBrm = valide('ia-brm', 'IT Manager Approval is required!');
         if (np.projectBrm == false) {
             bar.hide();
             return false;
@@ -655,7 +655,7 @@ function saveITManagerApproval(value) {
             var msg = '';
             var to = '';
             if (value === true) {
-                msg = 'Your answer has been sent to BRM.';
+                msg = 'Your answer has been sent to IT Manager Approval.';
             } else {
                 msg = 'Your answer has been sent back to Local Area Manager.';
             }

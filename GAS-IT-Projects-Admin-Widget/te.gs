@@ -7,7 +7,7 @@ function all(){
     var row = allData[i];
     if (row[0] == '') continue;
     var status = row[1];
-    if(status == 'BUSINESS RELATIONSHIP MANAGER'){
+    if(status == 'IT MANAGER APPROVAL'){
       var col1 = rawData[i][0];
       var id = re.exec(col1)[1];
       //Logger.log('id: %s', id);
