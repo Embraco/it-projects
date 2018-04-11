@@ -672,7 +672,7 @@ function saveBrmManagerApproval(value) {
 
     np.projectBrmManagerApproval = value;
     if (value === true) {
-        np.projectBrmManagerBrmAnalyst = valide('brmm-brma', 'BRM Analyst is required!');
+        np.projectBrmManagerBrmAnalyst = valide('brmm-brma', 'IT Project Leader Analysis is required!');
         if (np.projectBrmManagerBrmAnalyst == false) {
             bar.hide();
             return false;
@@ -705,7 +705,7 @@ function saveBrmManagerApproval(value) {
             var msg = '';
             var to = '';
             if (value === true) {
-                msg = 'Your answer has been sent to BRM Analyst.';
+                msg = 'Your answer has been sent to IT Project Leader Analysis.';
             } else {
                 msg = 'Your answer has been sent back to BRM.';
             }

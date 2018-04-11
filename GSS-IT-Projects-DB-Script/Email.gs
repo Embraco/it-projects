@@ -23,8 +23,8 @@ function onOpen(){
   menu.addSeparator()
   menu.addItem('Change Local Area Manager', 'changeManager');
   menu.addItem('Change Local IT Manager', 'changeITLocalManager');
-  menu.addItem('Change BRM', 'changeBRM');
-  menu.addItem('Change BRM Analyst', 'changeBRMAnalyst');
+  menu.addItem('Change IT Manager Approval', 'changeBRM');
+  menu.addItem('Change IT Project Leader Analysis', 'changeBRMAnalyst');
   menu.addItem('Change IT Portfolio Manager', 'changePortfolio');
   menu.addItem('Change Project Manager', 'changeProjectManager');
   menu.addToUi();

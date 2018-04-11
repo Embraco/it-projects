@@ -25,7 +25,7 @@ function changeBRM() {
 function changeBRMAnalyst() {
   var active = SpreadsheetApp.getActiveSheet();
   var row = active.getActiveCell().getRow();
-  if(active.getRange(row, 2).getValue() == 'BRM ANALYST')
+  if(active.getRange(row, 2).getValue() == 'IT PROJECT LEADER ANALYSIS')
   changeCore('projectBrmManagerBrmAnalyst', 'D17');
   else
     SpreadsheetApp.getUi().alert('Alert', 'Unable to change a step already approved!', SpreadsheetApp.getUi().ButtonSet.OK);
@@ -100,7 +100,7 @@ function getStatusString(status){
         case projectStatus.BRM_MANAGERS:
             return 'IT MANAGER APPROVAL';
         case projectStatus.PROJECT_ANALYSIS:
-            return 'BRM ANALYST';
+            return 'IT PROJECT LEADER ANALYSIS';
         case projectStatus.PROJECT_PRIORITIZATION_FOR_EXECUTION:
             return 'IT PORTFOLIO MANAGER APPROVAL';
         case projectStatus.PROJECT_EXECUTION:

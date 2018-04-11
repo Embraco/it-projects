@@ -178,7 +178,7 @@ function getStatusString(status) {
         case projectStatus.BRM_MANAGERS:
             return 'IT MANAGER APPROVAL';
         case projectStatus.PROJECT_ANALYSIS:
-            return 'BRM ANALYST';
+            return 'IT PROJECT LEADER ANALYSIS';
         case projectStatus.PROJECT_PRIORITIZATION_FOR_EXECUTION:
             return 'IT PORTFOLIO MANAGER APPROVAL';
         case projectStatus.PROJECT_EXECUTION:
