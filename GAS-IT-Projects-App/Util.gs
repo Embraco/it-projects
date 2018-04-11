@@ -182,7 +182,7 @@ function getStatusString(status) {
         case projectStatus.PROJECT_PRIORITIZATION_FOR_EXECUTION:
             return 'IT PORTFOLIO MANAGER APPROVAL';
         case projectStatus.PROJECT_EXECUTION:
-            return 'PROJECT MANAGER';
+            return 'IT PROJECT EXECUTION';
         case projectStatus.PROJECT_IN_EVALUATION:
             return 'PROJECT IN EVALUATION';
         case projectStatus.FINISHED:

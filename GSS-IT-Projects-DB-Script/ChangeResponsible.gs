@@ -41,7 +41,7 @@ function changePortfolio() {
 function changeProjectManager() {
   var active = SpreadsheetApp.getActiveSheet();
   var row = active.getActiveCell().getRow();
-  if(active.getRange(row, 2).getValue() == 'PROJECT MANAGER')
+  if(active.getRange(row, 2).getValue() == 'IT PROJECT EXECUTION')
   changeCore('projectPm', 'B31');
   else
     SpreadsheetApp.getUi().alert('Alert', 'Unable to change a step already approved!', SpreadsheetApp.getUi().ButtonSet.OK);
@@ -104,7 +104,7 @@ function getStatusString(status){
         case projectStatus.PROJECT_PRIORITIZATION_FOR_EXECUTION:
             return 'IT PORTFOLIO MANAGER APPROVAL';
         case projectStatus.PROJECT_EXECUTION:
-            return 'PROJECT MANAGER';
+            return 'IT PROJECT EXECUTION';
         case projectStatus.PROJECT_IN_EVALUATION:
             return 'PROJECT IN EVALUATION';
         case projectStatus.FINISHED:

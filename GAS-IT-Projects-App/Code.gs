@@ -404,7 +404,7 @@ function savePortfolioApproval(np) {
         if (np.projectITPortfolioApproval) {
             text = '';
             comment = {
-                comment: 'Request has been APPROVED by IT Portfolio Manager and sent to Project Manager.<br><b>IT Portfolio Manager comment:</b> ' + np.projectITPortfolioComment,
+                comment: 'Request has been APPROVED by IT Portfolio Manager and sent to IT Project Execution.<br><b>IT Portfolio Manager comment:</b> ' + np.projectITPortfolioComment,
                 date: np.projectITPortfolioApprovalDate,
                 commenter: np.projectITPortfolioApprover
             };
@@ -468,7 +468,7 @@ function saveProjectManagerRequest(np) {
             addToAutoClose = true;
         } else {
             comment = {
-                comment: 'Request has been saved with a new comment by Project Manager.<br><b>Project Manager comment:</b> ' + np.projectPmComment,
+                comment: 'Request has been saved with a new comment by IT Project Execution.<br><b>IT Project Execution comment:</b> ' + np.projectPmComment,
                 date: np.projectPmApprovalDate,
                 commenter: np.projectPmApprover
             };

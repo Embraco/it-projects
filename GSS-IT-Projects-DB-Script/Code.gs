@@ -26,7 +26,7 @@ function onOpen(){
   menu.addItem('Change IT Manager Approval', 'changeBRM');
   menu.addItem('Change IT Project Leader Analysis', 'changeBRMAnalyst');
   menu.addItem('Change IT Portfolio Manager', 'changePortfolio');
-  menu.addItem('Change Project Manager', 'changeProjectManager');
+  menu.addItem('Change IT Project Execution', 'changeProjectManager');
   menu.addToUi();
 }
 
