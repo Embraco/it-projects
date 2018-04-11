@@ -48,7 +48,7 @@
                                         <option value="">OPEN</option>
                                         <option value="DRAFT">DRAFT</option>
                                         <option value="LOCAL AREA MANAGER APPROVAL">LOCAL AREA MANAGER APPROVAL</option>
-                                        <option value="LOCAL IT MANAGER APPROVAL">IT BUSINESS DEVELOPMENT MANAGER</option>
+                                        <option value="LOCAL IT MANAGER APPROVAL">IT PROJECT PRIORITIZATION FORUM</option>
                                         <option value="BUSINESS RELATIONSHIP MANAGER">BUSINESS RELATIONSHIP MANAGER</option>
                                         <option value="BRM ANALYST">BRM Analyst</option>
                                         <option value="IT PORTFOLIO MANAGER APPROVAL">IT PORTFOLIO MANAGER APPROVAL</option>
@@ -371,7 +371,7 @@ window.addEventListener('load', function() {
     });
     $('#fr-rq-id').keypress(function(e) {
         if(e.which == 13) {
-           gpage = 1; 
+           gpage = 1;
            $('#currentPage').text(gpage);
            searchRequest(gpage);
     } });

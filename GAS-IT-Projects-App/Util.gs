@@ -174,7 +174,7 @@ function getStatusString(status) {
         case projectStatus.BUSINESS_APPROVAL:
             return 'LOCAL AREA MANAGER APPROVAL';
         case projectStatus.IT_APPROVAL:
-            return 'IT BUSINESS DEVELOPMENT MANAGER';
+            return 'IT PROJECT PRIORITIZATION FORUM';
         case projectStatus.BRM_MANAGERS:
             return 'BUSINESS RELATIONSHIP MANAGER';
         case projectStatus.PROJECT_ANALYSIS:

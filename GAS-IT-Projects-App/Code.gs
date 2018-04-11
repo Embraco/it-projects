@@ -169,7 +169,7 @@ function saveApprovalStep(np) {
       if (np.projectApproval) {
         text = '';
         comment = {
-          comment: 'Request has been APPROVED by Local Area Manager and sent to IT Business Development Manager.<br><b>Local Area Manager comment:</b> ' + np.projectApprovalComment,
+          comment: 'Request has been APPROVED by Local Area Manager and sent to IT Project Prioritization Forum.<br><b>Local Area Manager comment:</b> ' + np.projectApprovalComment,
           date: np.projectApprovalDate,
           commenter: np.projectApprovalApprover
         };
@@ -178,7 +178,7 @@ function saveApprovalStep(np) {
         var bkpITBusinessDevManager = getConfigByKey('BackupITBusinessDevelopmentManager');
         if (bkpITBusinessDevManager == undefined) bkpITBusinessDevManager = 'thalita.m.begliomini@embraco.com';
         if (np.projectLocalITManager != bkpITBusinessDevManager)
-          sendEmail2ITBusinessDevManagerBKP(bkpITBusinessDevManager, 'Request has been sent IT Business Development Manager #' + np.projectID, np.projectPlanID, np.projectName, np.projectBrmApprover);
+          sendEmail2ITBusinessDevManagerBKP(bkpITBusinessDevManager, 'Request has been sent IT Project Prioritization Forum #' + np.projectID, np.projectPlanID, np.projectName, np.projectBrmApprover);
         //=========================+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         currentResponsible = np.projectLocalITManager;
       } else {
@@ -229,19 +229,19 @@ function saveITManagerApproval(np) {
         if (np.projectITApproval) {
             text = '';
             comment = {
-                comment: 'Request has been APPROVED by IT Business Development Manager and sent to BRM<br><b>IT Business Development Manager comment:</b> ' + np.projectITApprovalComment,
+                comment: 'Request has been APPROVED by IT Project Prioritization Forum and sent to BRM<br><b>IT Project Prioritization Forum comment:</b> ' + np.projectITApprovalComment,
                 date: np.projectITApprovalDate,
                 commenter: np.projectITApprover
             };
-            sendEmail(np.projectBrm, 'Request has been approved by IT Business Development Manager #' + np.projectID, np.projectPlanID, np.projectName, np.projectITApprover, np.projectITApprovalComment);
+            sendEmail(np.projectBrm, 'Request has been approved by IT Project Prioritization Forum #' + np.projectID, np.projectPlanID, np.projectName, np.projectITApprover, np.projectITApprovalComment);
             currentResponsible = np.projectBrm;
         } else {
             comment = {
-                comment: 'Request has been REJECTED by IT Business Development Manager and sent back to Requester.<br><b>IT Business Development Manager comment:</b> ' + np.projectITApprovalComment,
+                comment: 'Request has been REJECTED by IT Project Prioritization Forum and sent back to Requester.<br><b>IT Project Prioritization Forum comment:</b> ' + np.projectITApprovalComment,
                 date: np.projectITApprovalDate,
                 commenter: np.projectITApprover
             };
-            sendEmail(np.requesterEmail, 'Request has been rejected by IT Business Development Manager #' + np.projectID, np.projectPlanID, np.projectName, np.projectITApprover, np.projectITApprovalComment);
+            sendEmail(np.requesterEmail, 'Request has been rejected by IT Project Prioritization Forum #' + np.projectID, np.projectPlanID, np.projectName, np.projectITApprover, np.projectITApprovalComment);
             currentResponsible = np.requesterEmail;
             np.projectStatus = projectStatus.DRAFT;
         }
