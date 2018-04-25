@@ -1,5 +1,6 @@
 var PROJECT_TEMPLATE_ID = '1tfR61ryhNheoSMEiaR49m_nbXHaftZPHz5ScBpswsgE';
 var requestPlansFolder = '0B973TWs84ZCENFRvN1k4bXI4T2c';
+//var DB = '1Oy8ff12OsA4pu45c4mOfmNIcYtRmYt1yK7qHdPlHnk8'; //DEV DB
 var DB = '17JKCj7gFAC4veKp7glbO3jtLwLCNbql7URzTAo8z1l4'; // PROD DB
 var USER_DBCACHE = '1q81l8lHUU-9UqpWK8MjKXSyZgh7N7rWpiExAysAYulw';
 var COMMENT_RANGE = 'A3:C';
@@ -169,7 +170,7 @@ function saveApprovalStep(np) {
       if (np.projectApproval) {
         text = '';
         comment = {
-          comment: 'Request has been APPROVED by Local Area Manager and sent to IT Business Development Manager.<br><b>Local Area Manager comment:</b> ' + np.projectApprovalComment,
+          comment: 'Request has been APPROVED by Local Area Manager and sent to IT Project Prioritization Forum.<br><b>Local Area Manager comment:</b> ' + np.projectApprovalComment,
           date: np.projectApprovalDate,
           commenter: np.projectApprovalApprover
         };
@@ -178,7 +179,7 @@ function saveApprovalStep(np) {
         var bkpITBusinessDevManager = getConfigByKey('BackupITBusinessDevelopmentManager');
         if (bkpITBusinessDevManager == undefined) bkpITBusinessDevManager = 'thalita.m.begliomini@embraco.com';
         if (np.projectLocalITManager != bkpITBusinessDevManager)
-          sendEmail2ITBusinessDevManagerBKP(bkpITBusinessDevManager, 'Request has been sent IT Business Development Manager #' + np.projectID, np.projectPlanID, np.projectName, np.projectBrmApprover);
+          sendEmail2ITBusinessDevManagerBKP(bkpITBusinessDevManager, 'Request has been sent IT Project Prioritization Forum #' + np.projectID, np.projectPlanID, np.projectName, np.projectBrmApprover);
         //=========================+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         currentResponsible = np.projectLocalITManager;
       } else {
@@ -229,19 +230,19 @@ function saveITManagerApproval(np) {
         if (np.projectITApproval) {
             text = '';
             comment = {
-                comment: 'Request has been APPROVED by IT Business Development Manager and sent to BRM<br><b>IT Business Development Manager comment:</b> ' + np.projectITApprovalComment,
+                comment: 'Request has been APPROVED by IT Project Prioritization Forum and sent to IT Manager Approval<br><b>IT Project Prioritization Forum comment:</b> ' + np.projectITApprovalComment,
                 date: np.projectITApprovalDate,
                 commenter: np.projectITApprover
             };
-            sendEmail(np.projectBrm, 'Request has been approved by IT Business Development Manager #' + np.projectID, np.projectPlanID, np.projectName, np.projectITApprover, np.projectITApprovalComment);
+            sendEmail(np.projectBrm, 'Request has been approved by IT Project Prioritization Forum #' + np.projectID, np.projectPlanID, np.projectName, np.projectITApprover, np.projectITApprovalComment);
             currentResponsible = np.projectBrm;
         } else {
             comment = {
-                comment: 'Request has been REJECTED by IT Business Development Manager and sent back to Requester.<br><b>IT Business Development Manager comment:</b> ' + np.projectITApprovalComment,
+                comment: 'Request has been REJECTED by IT Project Prioritization Forum and sent back to Requester.<br><b>IT Project Prioritization Forum comment:</b> ' + np.projectITApprovalComment,
                 date: np.projectITApprovalDate,
                 commenter: np.projectITApprover
             };
-            sendEmail(np.requesterEmail, 'Request has been rejected by IT Business Development Manager #' + np.projectID, np.projectPlanID, np.projectName, np.projectITApprover, np.projectITApprovalComment);
+            sendEmail(np.requesterEmail, 'Request has been rejected by IT Project Prioritization Forum #' + np.projectID, np.projectPlanID, np.projectName, np.projectITApprover, np.projectITApprovalComment);
             currentResponsible = np.requesterEmail;
             np.projectStatus = projectStatus.DRAFT;
         }
@@ -287,21 +288,21 @@ function saveBrmManagerApproval(np) {
         if (np.projectBrmManagerApproval) {
             text = '';
             comment = {
-                comment: 'Request has been APPROVED by BRM and sent to BRM Analyst.<br><b>BRM comment:</b> ' + np.projectBrmManagerApprovalComment,
+                comment: 'Request has been APPROVED by IT Manager Approval and sent to IT Project Leader Analysis.<br><b>BRM comment:</b> ' + np.projectBrmManagerApprovalComment,
                 date: np.projectBrmManagerApprovalDate,
                 commenter: np.projectBrmManagerApprover
             };
-            sendEmail(np.projectBrmManagerBrmAnalyst, 'Request has been approved by BRM #' + np.projectID, np.projectPlanID, np.projectName, np.projectBrmManagerApprover, np.projectBrmManagerApprovalComment);
+            sendEmail(np.projectBrmManagerBrmAnalyst, 'Request has been approved by IT Manager Approval #' + np.projectID, np.projectPlanID, np.projectName, np.projectBrmManagerApprover, np.projectBrmManagerApprovalComment);
             currentResponsible = np.projectBrmManagerBrmAnalyst;
             np.projectStatus = projectStatus.PROJECT_ANALYSIS
         } else {
             // TODO: VERIFICAR PRA QUEM VOLTA
             comment = {
-                comment: 'Request has been REJECTED by BRM and sent back to Requester.<br><b>BRM comment:</b> ' + np.projectBrmManagerApprovalComment,
+                comment: 'Request has been REJECTED by IT Manager Approval and sent back to Requester.<br><b>IT Manager Approval comment:</b> ' + np.projectBrmManagerApprovalComment,
                 date: np.projectBrmManagerApprovalDate,
                 commenter: np.projectBrmManagerApprover
             };
-            sendEmail(np.requesterEmail, 'Request has been rejected by BRM #' + np.projectID, np.projectPlanID, np.projectName, np.projectBrmManagerApprover, np.projectBrmManagerApprovalComment);
+            sendEmail(np.requesterEmail, 'Request has been rejected by IT Manager Approval #' + np.projectID, np.projectPlanID, np.projectName, np.projectBrmManagerApprover, np.projectBrmManagerApprovalComment);
             currentResponsible = np.requesterEmail;
             np.projectStatus = projectStatus.DRAFT;
         }
@@ -346,11 +347,11 @@ function saveBrmAnalystApproval(np) {
         if (np.projectBrmApproval) {
             text = '';
             comment = {
-                comment: 'Request has been APPROVED by BRM Analyst and sent to IT Portfolio Manager.<br><b>BRM Analyst comment:</b> ' + np.projectBrmApprovalComment,
+                comment: 'Request has been APPROVED by IT Project Leader Analysis and sent to IT Portfolio Manager.<br><b>IT Project Leader Analysis comment:</b> ' + np.projectBrmApprovalComment,
                 date: np.projectBrmApprovalDate,
                 commenter: np.projectBrmApprover
             };
-            sendEmail(np.projectBrmPortfolioManager, 'Request has been approved by BRM Analyst #' + np.projectID, np.projectPlanID, np.projectName, np.projectBrmApprover, np.projectBrmApprovalComment);
+            sendEmail(np.projectBrmPortfolioManager, 'Request has been approved by IT Project Leader Analysis #' + np.projectID, np.projectPlanID, np.projectName, np.projectBrmApprover, np.projectBrmApprovalComment);
             currentResponsible = np.projectBrmPortfolioManager;
             var standardPortfolioManager = getConfigByKey('StandardPorfolioManager');
             if (standardPortfolioManager == undefined) standardPorfolioManager = 'thalita.m.begliomini@embraco.com';
@@ -358,11 +359,11 @@ function saveBrmAnalystApproval(np) {
                 sendEmail2Portfolio(standardPortfolioManager, 'Request has been sent to Portfolio Manager #' + np.projectID, np.projectPlanID, np.projectName, np.projectBrmApprover, np.projectBrmPortfolioManager);
         } else {
             comment = {
-                comment: 'Request has been REJECTED by BRM Analyst and sent back to BRM.<br><b>BRM Analyst comment:</b> ' + np.projectBrmApprovalComment,
+                comment: 'Request has been REJECTED by IT Project Leader Analysis and sent back to BRM.<br><b>IT Project Leader Analysis comment:</b> ' + np.projectBrmApprovalComment,
                 date: np.projectBrmApprovalDate,
                 commenter: np.projectBrmApprover
             };
-            sendEmail(np.projectLocalITManager, 'Request has been rejected by BRM Analyst #' + np.projectID, np.projectPlanID, np.projectName, np.projectBrmApprover, np.projectBrmApprovalComment);
+            sendEmail(np.projectLocalITManager, 'Request has been rejected by IT Project Leader Analysis #' + np.projectID, np.projectPlanID, np.projectName, np.projectBrmApprover, np.projectBrmApprovalComment);
             currentResponsible = np.projectLocalITManager;
             np.projectStatus = projectStatus.BRM_MANAGERS;
         }
@@ -404,7 +405,7 @@ function savePortfolioApproval(np) {
         if (np.projectITPortfolioApproval) {
             text = '';
             comment = {
-                comment: 'Request has been APPROVED by IT Portfolio Manager and sent to Project Manager.<br><b>IT Portfolio Manager comment:</b> ' + np.projectITPortfolioComment,
+                comment: 'Request has been APPROVED by IT Portfolio Manager and sent to IT Project Execution.<br><b>IT Portfolio Manager comment:</b> ' + np.projectITPortfolioComment,
                 date: np.projectITPortfolioApprovalDate,
                 commenter: np.projectITPortfolioApprover
             };
@@ -412,7 +413,7 @@ function savePortfolioApproval(np) {
             currentResponsible = np.projectPm;
         } else {
             comment = {
-                comment: 'Request has been REJECTED by IT Portfolio Manager and sent back to BRM Analyst.<br><b>IT Portfolio Manager comment:</b> ' + np.projectITPortfolioComment,
+                comment: 'Request has been REJECTED by IT Portfolio Manager and sent back to IT Project Leader Analysis.<br><b>IT Portfolio Manager comment:</b> ' + np.projectITPortfolioComment,
                 date: np.projectITPortfolioApprovalDate,
                 commenter: np.projectITPortfolioApprover
             };
@@ -468,7 +469,7 @@ function saveProjectManagerRequest(np) {
             addToAutoClose = true;
         } else {
             comment = {
-                comment: 'Request has been saved with a new comment by Project Manager.<br><b>Project Manager comment:</b> ' + np.projectPmComment,
+                comment: 'Request has been saved with a new comment by IT Project Execution.<br><b>IT Project Execution comment:</b> ' + np.projectPmComment,
                 date: np.projectPmApprovalDate,
                 commenter: np.projectPmApprover
             };

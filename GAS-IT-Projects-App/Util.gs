@@ -174,15 +174,15 @@ function getStatusString(status) {
         case projectStatus.BUSINESS_APPROVAL:
             return 'LOCAL AREA MANAGER APPROVAL';
         case projectStatus.IT_APPROVAL:
-            return 'IT BUSINESS DEVELOPMENT MANAGER';
+            return 'IT PROJECT PRIORITIZATION FORUM';
         case projectStatus.BRM_MANAGERS:
-            return 'BUSINESS RELATIONSHIP MANAGER';
+            return 'IT MANAGER APPROVAL';
         case projectStatus.PROJECT_ANALYSIS:
-            return 'BRM ANALYST';
+            return 'IT PROJECT LEADER ANALYSIS';
         case projectStatus.PROJECT_PRIORITIZATION_FOR_EXECUTION:
             return 'IT PORTFOLIO MANAGER APPROVAL';
         case projectStatus.PROJECT_EXECUTION:
-            return 'PROJECT MANAGER';
+            return 'IT PROJECT EXECUTION';
         case projectStatus.PROJECT_IN_EVALUATION:
             return 'PROJECT IN EVALUATION';
         case projectStatus.FINISHED:

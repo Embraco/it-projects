@@ -1,5 +1,7 @@
-var DB = '17JKCj7gFAC4veKp7glbO3jtLwLCNbql7URzTAo8z1l4';
-var APP_URL = 'https://script.google.com/a/macros/embraco.com/s/AKfycbySNx1efeFJhlyPFzWDW5GPf3KFxLNket8U2KXDZxjH0WWA_c8/exec';
+//var DB = '1Oy8ff12OsA4pu45c4mOfmNIcYtRmYt1yK7qHdPlHnk8'; //DEV DB
+var DB = '17JKCj7gFAC4veKp7glbO3jtLwLCNbql7URzTAo8z1l4'; // PROD DB
+//var APP_URL = 'https://script.google.com/a/embraco.com/macros/s/AKfycbySJLQJcTXxfG_93Y31wDXzG8L2-MH2SjRSdQAD5jTNQZ1aYZw/exec'; //DEV APP
+var APP_URL = 'https://script.google.com/a/macros/embraco.com/s/AKfycbySNx1efeFJhlyPFzWDW5GPf3KFxLNket8U2KXDZxjH0WWA_c8/exec';  //PROD APP;
 var ARCHIVED_DB = '1e1gsjyPTt-lRIIex-rb6VGeIrM3JAE6I_0yH169Dln8';
 var EXPORT_FOLDER_ID = '0B973TWs84ZCEcllkSGJ2OTg0aU0';
 var PER_PAGE    = 25;

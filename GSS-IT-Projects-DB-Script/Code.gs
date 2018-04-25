@@ -1,7 +1,8 @@
 var STATUS_CELL = 'B11';
 var ARCHIVE_DB = '1e1gsjyPTt-lRIIex-rb6VGeIrM3JAE6I_0yH169Dln8';
 var USER_DBCACHE = '1q81l8lHUU-9UqpWK8MjKXSyZgh7N7rWpiExAysAYulw';
-var APP_URL = 'https://script.google.com/a/macros/embraco.com/s/AKfycbySNx1efeFJhlyPFzWDW5GPf3KFxLNket8U2KXDZxjH0WWA_c8/exec';
+//var APP_URL = 'https://script.google.com/a/embraco.com/macros/s/AKfycbySJLQJcTXxfG_93Y31wDXzG8L2-MH2SjRSdQAD5jTNQZ1aYZw/exec'; //DEV APP
+var APP_URL = 'https://script.google.com/a/macros/embraco.com/s/AKfycbySNx1efeFJhlyPFzWDW5GPf3KFxLNket8U2KXDZxjH0WWA_c8/exec';  //PROD APP;
 var projectStatus = {
   DRAFT: 1,
   BUSINESS_APPROVAL: 2,
@@ -22,11 +23,11 @@ function onOpen(){
   menu.addItem('Archive old Requests', 'archiveOldRequests');
   menu.addSeparator()
   menu.addItem('Change Local Area Manager', 'changeManager');
-  menu.addItem('Change Local IT Manager', 'changeITLocalManager');
-  menu.addItem('Change BRM', 'changeBRM');
-  menu.addItem('Change BRM Analyst', 'changeBRMAnalyst');
+  menu.addItem('Change IT Project Prioritization Forum', 'changeITLocalManager');
+  menu.addItem('Change IT Manager Approval', 'changeBRM');
+  menu.addItem('Change IT Project Leader Analysis', 'changeBRMAnalyst');
   menu.addItem('Change IT Portfolio Manager', 'changePortfolio');
-  menu.addItem('Change Project Manager', 'changeProjectManager');
+  menu.addItem('Change IT Project Execution', 'changeProjectManager');
   menu.addToUi();
 }
 

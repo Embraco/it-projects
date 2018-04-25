@@ -1,6 +1,8 @@
-var DB          = '17JKCj7gFAC4veKp7glbO3jtLwLCNbql7URzTAo8z1l4';
+//var DB = '1Oy8ff12OsA4pu45c4mOfmNIcYtRmYt1yK7qHdPlHnk8'; //DEV DB
+var DB = '17JKCj7gFAC4veKp7glbO3jtLwLCNbql7URzTAo8z1l4'; // PROD DB
 var ARCHIVED_DB = '1e1gsjyPTt-lRIIex-rb6VGeIrM3JAE6I_0yH169Dln8';
-var APP_URL     = 'https://script.google.com/a/macros/embraco.com/s/AKfycbySNx1efeFJhlyPFzWDW5GPf3KFxLNket8U2KXDZxjH0WWA_c8/exec';
+//var APP_URL = 'https://script.google.com/a/embraco.com/macros/s/AKfycbySJLQJcTXxfG_93Y31wDXzG8L2-MH2SjRSdQAD5jTNQZ1aYZw/exec'; //DEV APP
+var APP_URL = 'https://script.google.com/a/macros/embraco.com/s/AKfycbySNx1efeFJhlyPFzWDW5GPf3KFxLNket8U2KXDZxjH0WWA_c8/exec';  //PROD APP
 var EXPORT_FOLDER_ID = '0B973TWs84ZCEcllkSGJ2OTg0aU0';
 var PER_PAGE    = 25;
 var DATA_RANGE  = 'A6:V';
@@ -231,7 +233,7 @@ function searchRequest(filter, page){
 
 function exportToSheets(filter){
   var data = searchRequest(filter, 0).data;
-  var titles = ['REQUEST ID', 'STATUS', 'CURRENTLY WITH', 'START DATE', 'REQUESTER', 'LOCAL AREA MANAGER', 'TITLE', 'DEPARTMENT', 'PLANT', 'LAST UPDATE', 'LOCAL AREA MANAGER APPROVAL', 'LOCAL IT MANAGER', 'LOCAL IT MANAGER APPROVAL', 'BRM', 'BRM SEND', 'BRM ANALYST', 'BRM ANALYST SEND', 'IT PORTFOLIO MANAGER', 'IT PORTFOLIO MANAGER APPROVAL', 'PROJECT MANAGER', 'SPONSOR', 'EVALUATION'];
+  var titles = ['REQUEST ID', 'STATUS', 'CURRENTLY WITH', 'START DATE', 'REQUESTER', 'LOCAL AREA MANAGER', 'TITLE', 'DEPARTMENT', 'PLANT', 'LAST UPDATE', 'LOCAL AREA MANAGER APPROVAL', 'IT PROJECT PRIORITIZATION FORUM', 'IT PROJECT PRIORITIZATION FORUM APPROVAL', 'IT MANAGER', 'IT MANAGER SEND', 'IT PROJECT LEADER ANALYSIS', 'IT PROJECT LEADER ANALYSIS SEND', 'IT PORTFOLIO MANAGER', 'IT PORTFOLIO MANAGER APPROVAL', 'IT PROJECT EXECUTION', 'SPONSOR', 'EVALUATION'];
   var export = SpreadsheetApp.create('[IT Projects] Exported Requests - '+Utilities.formatDate(new Date(), "GMT", "yyyy-MM-dd HH:mm"), data.length, titles.length);
   var newSheet = DriveApp.getFileById(export.getId());
   DriveApp.getFolderById(EXPORT_FOLDER_ID).addFile(newSheet);

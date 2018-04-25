@@ -1,0 +1,12 @@
+----------------------------
+Column A:
+Values starts at row: 2
+
+lastID
+ITServiceNotificationEmail-BRAZIL
+autoCloseDays
+StandardPorfolioManager
+StandardITBusinessDevelopmentManager
+BackupITBusinessDevelopmentManager
+
+-----------------------------
